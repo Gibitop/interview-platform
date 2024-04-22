@@ -1,7 +1,7 @@
 import { Editor as MonacoEditor, OnMount } from '@monaco-editor/react';
 import { MonacoBinding } from 'y-monaco';
 import { useYjs } from './contexts/YjsContext';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { editor } from 'monaco-editor';
 import { useWebContainer } from '~/hooks/useWebContainer';
 import { useRoomStore } from '~/stores/room';
@@ -11,6 +11,7 @@ import prettier from 'prettier/standalone';
 import prettierPluginEstree from 'prettier/plugins/estree';
 import prettierPluginTypeScript from 'prettier/plugins/typescript';
 import { FilePicker } from './FilePicker';
+import { RotateCw } from 'lucide-react';
 
 export const Editor = () => {
     const yjs = useYjs();
@@ -120,19 +121,26 @@ export const Editor = () => {
         return { __html: cursorStyles };
     }, [users]);
 
+    const getActiveFileContent = useCallback(async () => {
+        if (!wc || !activeFile) return;
+        let activeFileContent = await wc.fs.readFile(activeFile).catch(() => {
+            wc.fs.writeFile(activeFile, '');
+            return '';
+        });
+        if (activeFileContent instanceof Uint8Array) {
+            activeFileContent = new TextDecoder().decode(activeFileContent);
+        }
+        return activeFileContent;
+    }, [activeFile, wc]);
+
     // Change the active file and follow external changes
     useEffect(() => {
-        if (!wc || !monacoEditor || !activeFile) return;
+        if (!wc || !monacoEditor) return;
 
         (async () => {
-            let activeFileContent = await wc.fs.readFile(activeFile).catch(() => {
-                wc.fs.writeFile(activeFile, '');
-                return '';
-            });
-            if (activeFileContent instanceof Uint8Array) {
-                activeFileContent = new TextDecoder().decode(activeFileContent);
-            }
+            const activeFileContent = await getActiveFileContent();
 
+            // ! BUG:
             // If host reloads, when the wc is ready, the file will be read and it will be empty
             // This will overwrite the editor content with an empty string, deleting the work
             // If we check if the file is empty, we can avoid this
@@ -144,26 +152,41 @@ export const Editor = () => {
                 monacoEditor.setValue(activeFileContent);
             }
 
-            wc.fs.watch(activeFile, async event => {
-                if (event === 'change') {
-                    activeFileContent = await wc.fs.readFile(activeFile);
-                    if (activeFileContent instanceof Uint8Array) {
-                        activeFileContent = new TextDecoder().decode(activeFileContent);
-                    }
-                    if (activeFileContent.toString() !== monacoEditor.getValue()) {
-                        monacoEditor.setValue(activeFileContent.toString() || '');
-                    }
-                }
-            });
+            // ! BUG: Resets cursor on fs heavy operations (like tests with --watch)
+            // wc.fs.watch(activeFile, async event => {
+            //     if (event === 'change') {
+            //         activeFileContent = await wc.fs.readFile(activeFile);
+            //         if (activeFileContent instanceof Uint8Array) {
+            //             activeFileContent = new TextDecoder().decode(activeFileContent);
+            //         }
+            //         if (activeFileContent.toString() !== monacoEditor.getValue()) {
+            //             monacoEditor.setValue(activeFileContent.toString() || '');
+            //         }
+            //     }
+            // });
         })();
-    }, [activeFile, monacoEditor, wc]);
+    }, [activeFile, getActiveFileContent, monacoEditor, wc]);
 
     return (
         <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
             <div className="px-3 py-2 flex justify-between">
                 {isHost ? <FilePicker /> : activeFile}
-                <div className="flex gap-3">
+                <div className="flex gap-2">
+                    {isHost && (
+                        <Button
+                            size="xs"
+                            variant="secondary"
+                            className="aspect-square p-0"
+                            onClick={() =>
+                                getActiveFileContent().then(content =>
+                                    monacoEditor?.setValue(content || ''),
+                                )
+                            }
+                        >
+                            <RotateCw className="size-3" />
+                        </Button>
+                    )}
                     <Button size="xs" variant="secondary" onClick={handleFormat}>
                         Format
                     </Button>
