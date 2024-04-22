@@ -37,7 +37,7 @@ export const EnterUsernameCard: React.FC<TEnterUsernameCardProps> = ({ onSubmit 
     };
 
     return (
-        <Card className="p-4 shadow-md h-56">
+        <Card className="p-4 shadow-md h-56 w-[400px]">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}

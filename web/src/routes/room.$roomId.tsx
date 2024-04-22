@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
 import { z } from 'zod';
@@ -33,7 +33,7 @@ const Room = () => {
             <main className="min-h-screen grid place-items-center">
                 <div>
                     <h1 className="w-full text-center font-semibold text-3xl mb-3">
-                        Unnamed interview platform
+                        <Link to="/">Unnamed interview platform</Link>
                     </h1>
                     <EnterUsernameCard
                         onSubmit={myUsername => useRoomStore.setState({ myUsername })}
@@ -49,7 +49,7 @@ const Room = () => {
                 <main className="h-screen flex flex-col">
                     <div className="flex justify-between border-b dark:border-neutral-800 px-3 py-2">
                         <h1 className="font-semibold text-lg leading-6">
-                            Unnamed interview platform
+                            <Link to="/">Unnamed interview platform</Link>
                         </h1>
                         <Participants />
                     </div>
