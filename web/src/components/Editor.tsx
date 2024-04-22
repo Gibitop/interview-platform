@@ -6,6 +6,10 @@ import type { editor } from 'monaco-editor';
 import { useWebContainer } from '~/hooks/useWebContainer';
 import { useRoomStore } from '~/stores/room';
 import { useUsers } from './contexts/UsersContext';
+import { Button } from './ui/button';
+import prettier from 'prettier/standalone';
+import prettierPluginEstree from 'prettier/plugins/estree';
+import prettierPluginTypeScript from 'prettier/plugins/typescript';
 
 export const Editor = () => {
     const yjs = useYjs();
@@ -53,6 +57,21 @@ export const Editor = () => {
         editor.setModel(codeModel);
     };
 
+    const handleFormat = () => {
+        if (!monacoEditor) return;
+        prettier
+            .format(monacoEditor.getValue(), {
+                parser: 'typescript',
+                semi: true,
+                printWidth: 100,
+                singleQuote: true,
+                trailingComma: 'all',
+                arrowParens: 'avoid',
+                plugins: [prettierPluginEstree, prettierPluginTypeScript],
+            })
+            .then(formatted => monacoEditor.setValue(formatted));
+    };
+
     const users = useUsers();
 
     const styleSheet = useMemo(() => {
@@ -74,14 +93,20 @@ export const Editor = () => {
     }, [users]);
 
     return (
-        <>
+        <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
+            <div className="px-3 py-2 flex justify-between">
+                {activeFile}
+                <Button size="xs" variant="ghost" onClick={handleFormat}>
+                    Format
+                </Button>
+            </div>
             <MonacoEditor
                 theme="vs-dark"
                 onMount={handleMonacoMount}
                 onChange={val => wc?.fs.writeFile(activeFile, val || '')}
                 options={{ fontSize: 14, minimap: { enabled: false } }}
             />
-        </>
+        </div>
     );
 };

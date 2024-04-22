@@ -54,14 +54,8 @@ const Room = () => {
                         <Participants />
                     </div>
                     <div className="flex-1">
-                        {/* <div className="w-16">I</div> */}
                         <ResizablePanelGroup direction="horizontal">
-                            {/* <ResizablePanel defaultSize={16} minSize={12} collapsible collapsedSize={0}>
-                            Left
-                        </ResizablePanel>
-                        <ResizableHandle /> */}
-                            <ResizablePanel className="flex flex-col">
-                                <div className="px-3 py-2">{room.activeFile}</div>
+                            <ResizablePanel>
                                 <Editor />
                             </ResizablePanel>
                             <ResizableHandle />
