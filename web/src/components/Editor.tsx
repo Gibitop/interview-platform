@@ -25,15 +25,6 @@ export const Editor = () => {
             new Set([monacoEditor]),
             yjs!.awareness,
         );
-
-        // const changeListener = (change: { added: any[]; updated: any[]; removed: any[] }) => {
-
-        // };
-        // yjs.awareness.on('change', changeListener);
-
-        // return () => {
-        //     yjs.awareness.off('change', changeListener);
-        // };
     }, [yjs, monacoEditor]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

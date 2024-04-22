@@ -6,6 +6,7 @@ export type TUser = {
     name: string;
     isActive: boolean;
     color: string;
+    joinedAt: number;
 };
 
 export type TUsersContext = TUser[];
@@ -31,32 +32,40 @@ export const UsersProvider = ({ children, userName }: TUsersProviderProps) => {
     useEffect(() => {
         if (!yjs) return;
         const updateUsers = () => {
-            const newValue = [...yjs.awareness.getStates().entries()].map(([id, state]) => ({
-                id,
-                name: state.user?.name,
-                isActive: state.user?.isActive,
-                color: state.user?.color,
-            }));
+            const myJoinedAt = yjs.awareness.getLocalState()?.user?.joinedAt ?? Number.MAX_VALUE;
+            let myIndex = 0;
+            const newValue: TUser[] = [];
+            for (const [id, state] of yjs.awareness.getStates().entries()) {
+                if (!state.user) continue;
+
+                if (state.user.joinedAt < myJoinedAt) myIndex++;
+
+                newValue.push({
+                    ...state.user,
+                    id,
+                });
+            }
+
+            yjs.awareness.setLocalStateField('user', {
+                ...yjs.awareness.getLocalState()?.user,
+                color: colors[myIndex % colors.length],
+            } satisfies Partial<Omit<TUser, 'id'>>);
+
             setValue(newValue);
         };
-
-        yjs.awareness.on('change', updateUsers);
-        updateUsers();
 
         yjs.awareness.setLocalStateField('user', {
             name: userName,
             isActive: true,
             color: '',
+            joinedAt: Date.now(),
         } satisfies Partial<Omit<TUser, 'id'>>);
 
-        // We don't know how many users are already connected at this time
-        // So... workaround by setting the color after a delay
-        setTimeout(() => {
-            yjs.awareness.setLocalStateField('user', {
-                ...yjs.awareness.getLocalState()?.user,
-                color: colors[yjs.awareness.getStates().size % colors.length],
-            } satisfies Partial<Omit<TUser, 'id'>>);
-        }, 200);
+        yjs.awareness.on('change', updateUsers);
+        updateUsers();
+
+        // Workaround for awareness not updating on first render
+        setTimeout(updateUsers, 500);
 
         const blurListener = () => {
             yjs.awareness.setLocalStateField('user', {
