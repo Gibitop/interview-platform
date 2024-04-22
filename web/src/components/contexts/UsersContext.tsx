@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useYjs } from './YjsContext';
+import { useRoomStore } from '~/stores/room';
 
 export type TUser = {
     id: number;
@@ -7,6 +8,7 @@ export type TUser = {
     isActive: boolean;
     color: string;
     joinedAt: number;
+    isHost: boolean;
 };
 
 export type TUsersContext = TUser[];
@@ -28,6 +30,7 @@ const colors = [
 export const UsersProvider = ({ children, userName }: TUsersProviderProps) => {
     const yjs = useYjs();
     const [value, setValue] = useState<TUsersContext>([]);
+    const isHost = useRoomStore(s => s.isHost);
 
     useEffect(() => {
         if (!yjs) return;
@@ -35,7 +38,10 @@ export const UsersProvider = ({ children, userName }: TUsersProviderProps) => {
             const myJoinedAt = yjs.awareness.getLocalState()?.user?.joinedAt ?? Number.MAX_VALUE;
             let myIndex = 0;
             const newValue: TUser[] = [];
-            for (const [id, state] of yjs.awareness.getStates().entries()) {
+
+            for (const stateEntry of yjs.awareness.getStates().entries()) {
+                const [id, state] = stateEntry as [number, { user?: TUser }];
+
                 if (!state.user) continue;
 
                 if (state.user.joinedAt < myJoinedAt) myIndex++;
@@ -59,6 +65,7 @@ export const UsersProvider = ({ children, userName }: TUsersProviderProps) => {
             isActive: true,
             color: '',
             joinedAt: Date.now(),
+            isHost: isHost,
         } satisfies Partial<Omit<TUser, 'id'>>);
 
         yjs.awareness.on('change', updateUsers);

@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import { useUsers } from './contexts/UsersContext';
+import { Crown } from 'lucide-react';
 
 export const Participants = () => {
     const users = useUsers();
@@ -13,13 +14,23 @@ export const Participants = () => {
                         className="flex items-center gap-1.5 px-2 rounded-md"
                         style={{ border: `1px solid ${user.color}` }}
                     >
-                        <div
-                            className={clsx(
-                                'size-2 rounded-full',
-                                user.isActive && 'bg-green-500',
-                                !user.isActive && 'bg-red-500',
-                            )}
-                        />
+                        {user.isHost ? (
+                            <Crown
+                                className={clsx(
+                                    'size-3 rounded-full',
+                                    user.isActive && 'text-green-500',
+                                    !user.isActive && 'text-red-500',
+                                )}
+                            />
+                        ) : (
+                            <div
+                                className={clsx(
+                                    'size-2 rounded-full',
+                                    user.isActive && 'bg-green-500',
+                                    !user.isActive && 'bg-red-500',
+                                )}
+                            />
+                        )}
                         {user.name ?? user.id ?? 'Unknown'}
                     </li>
                 ))}
