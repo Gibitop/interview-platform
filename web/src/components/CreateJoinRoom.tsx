@@ -17,6 +17,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { v4 as uuid4 } from 'uuid';
 import { useEffect } from 'react';
 import { useRoomStore } from '~/stores/room';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
     roomId: z.string().min(1),
@@ -93,7 +94,17 @@ export const CreateJoinRoom = ({ isCreate }: TCreateJoinRoomProps) => {
                                 <FormItem>
                                     <FormLabel>Room id</FormLabel>
                                     <FormControl>
-                                        <Input {...field} disabled={isCreate} />
+                                        <Input
+                                            {...field}
+                                            withCopy={isCreate}
+                                            disabled={isCreate}
+                                            onCopy={() =>
+                                                toast('Room id copied!', {
+                                                    duration: 1500,
+                                                    position: 'top-center',
+                                                })
+                                            }
+                                        />
                                     </FormControl>
                                     <FormDescription>
                                         {isCreate
