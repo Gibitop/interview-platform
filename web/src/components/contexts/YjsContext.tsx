@@ -9,9 +9,10 @@ export type TYjsProviderProps = {
 
 type TYjsContext = {
     document: Y.Doc;
-    awareness: WebrtcProvider['awareness'];
+    provider: WebrtcProvider;
     monacoTextType: Y.Text;
     terminalTextType: Y.Text;
+    activeFileTextType: Y.Text;
 } | null;
 
 const yjsContext = createContext<TYjsContext>(null);
@@ -24,10 +25,18 @@ export const YjsProvider: React.FC<TYjsProviderProps> = ({ children, roomId }) =
         const provider = new WebrtcProvider(roomId, document, {
             signaling: [window.location.origin.replace('http', 'ws') + '/ws'],
         });
+
         const monacoTextType = document.getText('monaco');
         const terminalTextType = document.getText('terminal');
+        const activeFileTextType = document.getText('activeFile');
 
-        setValue({ document, awareness: provider.awareness, monacoTextType, terminalTextType });
+        setValue({
+            document,
+            provider,
+            monacoTextType,
+            terminalTextType,
+            activeFileTextType,
+        });
 
         return () => {
             provider.destroy();

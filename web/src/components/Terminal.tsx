@@ -45,10 +45,6 @@ export const Terminal = () => {
                 });
             };
             yjs.terminalTextType.observe(observer);
-
-            // terminalRef.current.onData(data => {
-            //     yjs.terminalTextType.insert(yjs.terminalTextType.length, data);
-            // });
         }
 
         return () => {

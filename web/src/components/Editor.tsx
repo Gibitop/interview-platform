@@ -10,6 +10,7 @@ import { Button } from './ui/button';
 import prettier from 'prettier/standalone';
 import prettierPluginEstree from 'prettier/plugins/estree';
 import prettierPluginTypeScript from 'prettier/plugins/typescript';
+import { FilePicker } from './FilePicker';
 
 export const Editor = () => {
     const yjs = useYjs();
@@ -21,13 +22,14 @@ export const Editor = () => {
 
     const wc = useWebContainer(!isHost);
 
+    // Connect Yjs to Monaco
     useEffect(() => {
         if (!yjs || !monacoEditor) return;
         new MonacoBinding(
             yjs!.monacoTextType,
             monacoEditor.getModel()!,
             new Set([monacoEditor]),
-            yjs!.awareness,
+            yjs!.provider.awareness,
         );
     }, [yjs, monacoEditor]);
 
@@ -57,6 +59,31 @@ export const Editor = () => {
         editor.setModel(codeModel);
     };
 
+    // Sync the active file with Yjs
+    useEffect(() => {
+        if (!yjs) return;
+
+        const listener: Parameters<typeof yjs.activeFileTextType.observe>[0] = () => {
+            useRoomStore.setState({ activeFile: yjs.activeFileTextType.toString() });
+        };
+        yjs.activeFileTextType.observe(listener);
+
+        // Only host can change the active file
+        if (
+            isHost &&
+            yjs.provider.room?.synced &&
+            activeFile !== yjs.activeFileTextType.toString()
+        ) {
+            yjs.activeFileTextType.delete(0, yjs.activeFileTextType.toString().length);
+            yjs.activeFileTextType.insert(0, activeFile);
+        }
+
+        return () => {
+            yjs.activeFileTextType.unobserve(listener);
+        };
+    }, [activeFile, isHost, yjs]);
+
+    // Prettier formatting
     const handleFormat = () => {
         if (!monacoEditor) return;
         prettier
@@ -72,8 +99,8 @@ export const Editor = () => {
             .then(formatted => monacoEditor.setValue(formatted));
     };
 
+    // Add user cursors
     const users = useUsers();
-
     const styleSheet = useMemo(() => {
         let cursorStyles = '';
 
@@ -92,14 +119,66 @@ export const Editor = () => {
         return { __html: cursorStyles };
     }, [users]);
 
+    // Change the active file and follow external changes
+    useEffect(() => {
+        if (!wc || !monacoEditor || !activeFile) return;
+
+        (async () => {
+            let activeFileContent = await wc.fs.readFile(activeFile).catch(() => {
+                wc.fs.writeFile(activeFile, '');
+                return '';
+            });
+            if (activeFileContent instanceof Uint8Array) {
+                activeFileContent = new TextDecoder().decode(activeFileContent);
+            }
+
+            // If host reloads, when the wc is ready, the file will be read and it will be empty
+            // This will overwrite the editor content with an empty string, deleting the work
+            // If we check if the file is empty, we can avoid this
+            // But when we open an empty file next, we will copy the editor content to the file
+            // Which is not ideal, but better than losing the work
+
+            // Don't overwrite the editor content if the local file is empty
+            if (activeFileContent) {
+                monacoEditor.setValue(activeFileContent);
+            }
+
+            wc.fs.watch(activeFile, async event => {
+                if (event === 'change') {
+                    activeFileContent = await wc.fs.readFile(activeFile);
+                    if (activeFileContent instanceof Uint8Array) {
+                        activeFileContent = new TextDecoder().decode(activeFileContent);
+                    }
+                    if (activeFileContent.toString() !== monacoEditor.getValue()) {
+                        monacoEditor.setValue(activeFileContent.toString() || '');
+                    }
+                }
+            });
+        })();
+    }, [activeFile, monacoEditor, wc]);
+
     return (
         <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
             <div className="px-3 py-2 flex justify-between">
-                {activeFile}
-                <Button size="xs" variant="ghost" onClick={handleFormat}>
-                    Format
-                </Button>
+                {isHost ? <FilePicker /> : activeFile}
+                <div className="flex gap-3">
+                    {isHost && (
+                        <Button
+                            size="xs"
+                            variant="secondary"
+                            onClick={() =>
+                                monacoEditor &&
+                                wc?.fs.writeFile(activeFile, monacoEditor.getValue())
+                            }
+                        >
+                            Force save
+                        </Button>
+                    )}
+                    <Button size="xs" variant="secondary" onClick={handleFormat}>
+                        Format
+                    </Button>
+                </div>
             </div>
             <MonacoEditor
                 theme="vs-dark"
