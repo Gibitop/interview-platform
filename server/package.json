@@ -1,0 +1,11 @@
+{
+    "name": "server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "type": "module",
+    "dependencies": {
+        "lib0": "^0.2.93",
+        "ws": "^8.16.0"
+    }
+}

@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply dark:bg-neutral-900 dark:text-neutral-100;
+}
+
+
+.yRemoteSelection {
+    background-color: var(--user-color);
+    opacity: 0.5;
+}
+
+.yRemoteSelectionHead {
+    position: absolute;
+    border-left: var(--user-color) solid 2px;
+    border-top: var(--user-color) solid 2px;
+    border-bottom: var(--user-color) solid 2px;
+    height: 100%;
+    box-sizing: border-box;
+    /* opacity: 0.7; */
+}
+
+.yRemoteSelectionHead::after {
+    position: absolute;
+    content: ' ';
+    font-size: 10px;
+    background-color: var(--user-color);
+    border-radius: 2px;
+    padding: 0 2px;
+    color: white;
+    line-height: 1rem;
+    left: -2px;
+    top: -1rem;
+}
