@@ -1,9 +1,10 @@
 import { useTerminal } from '~/hooks/useTerminal';
 import { useYjs } from './contexts/YjsContext';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import '@xterm/xterm/css/xterm.css';
 import { useWebContainer } from '~/hooks/useWebContainer';
 import { useRoomStore } from '~/stores/room';
+import { Button } from './ui/button';
 
 export const Terminal = () => {
     const yjs = useYjs();
@@ -52,5 +53,48 @@ export const Terminal = () => {
         };
     }, [terminalRef, yjs, wc, isHost]);
 
-    return <div className="h-full" ref={elRef} />;
+    const uploadInputRef = useRef<HTMLInputElement>(null);
+
+    const handleUpload = async () => {
+        if (!uploadInputRef.current?.files?.length || !wc) return;
+        for (const file of uploadInputRef.current.files) {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const data = new Uint8Array(reader.result as ArrayBuffer);
+                wc.fs.writeFile(file.name, data);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        uploadInputRef.current.files = null;
+    };
+
+    return (
+        <>
+            <input
+                ref={uploadInputRef}
+                multiple
+                type="file"
+                className="hidden"
+                onChange={handleUpload}
+            />
+            <div className="px-3 py-2 flex justify-between">
+                {isHost ? 'Terminal (read-write)' : 'Terminal (read-only)'}
+                <div className="flex gap-3">
+                    {isHost && (
+                        <Button
+                            disabled={!wc}
+                            size="xs"
+                            variant="secondary"
+                            onClick={() => uploadInputRef.current?.click()}
+                        >
+                            Upload
+                        </Button>
+                    )}
+                </div>
+            </div>
+            <div className="hidden @[250px]:block h-full">
+                <div className="h-full" ref={elRef} />
+            </div>
+        </>
+    );
 };

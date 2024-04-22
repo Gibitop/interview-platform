@@ -39,8 +39,8 @@ export const YjsProvider: React.FC<TYjsProviderProps> = ({ children, roomId }) =
         });
 
         return () => {
-            provider.destroy();
             document.destroy();
+            provider.destroy();
             setValue(null);
         };
     }, [roomId]);

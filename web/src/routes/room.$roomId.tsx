@@ -65,12 +65,7 @@ const Room = () => {
                                 collapsedSize={3}
                                 className="flex flex-col @container"
                             >
-                                <div className="px-3 py-2">
-                                    {room.isHost ? 'Terminal (read-write)' : 'Terminal (read-only)'}
-                                </div>
-                                <div className="hidden @[250px]:block h-full">
-                                    <Terminal />
-                                </div>
+                                <Terminal />
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     </div>

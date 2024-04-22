@@ -163,18 +163,6 @@ export const Editor = () => {
             <div className="px-3 py-2 flex justify-between">
                 {isHost ? <FilePicker /> : activeFile}
                 <div className="flex gap-3">
-                    {isHost && (
-                        <Button
-                            size="xs"
-                            variant="secondary"
-                            onClick={() =>
-                                monacoEditor &&
-                                wc?.fs.writeFile(activeFile, monacoEditor.getValue())
-                            }
-                        >
-                            Force save
-                        </Button>
-                    )}
                     <Button size="xs" variant="secondary" onClick={handleFormat}>
                         Format
                     </Button>
