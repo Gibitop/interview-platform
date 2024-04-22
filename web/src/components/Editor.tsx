@@ -90,6 +90,7 @@ export const Editor = () => {
             .format(monacoEditor.getValue(), {
                 parser: 'typescript',
                 semi: true,
+                tabWidth: 4,
                 printWidth: 100,
                 singleQuote: true,
                 trailingComma: 'all',
