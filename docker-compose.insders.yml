@@ -1,0 +1,7 @@
+# This file is only used to pre-build room images with custom names expected by the backend
+# We never run these services with docker compose
+
+services:
+    insider-node:
+        image: insider-node
+        build: './insider'

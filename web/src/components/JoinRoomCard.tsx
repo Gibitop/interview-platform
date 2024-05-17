@@ -14,8 +14,6 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { useNavigate } from '@tanstack/react-router';
-import { v4 as uuid4 } from 'uuid';
-import { useEffect } from 'react';
 import { useRoomStore } from '~/stores/room';
 import { toast } from 'sonner';
 
@@ -24,11 +22,7 @@ const formSchema = z.object({
     username: z.string().min(1),
 });
 
-export type TCreateJoinRoomProps = {
-    isCreate: boolean;
-};
-
-export const CreateJoinRoom = ({ isCreate }: TCreateJoinRoomProps) => {
+export const JoinRoomCard = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -36,41 +30,29 @@ export const CreateJoinRoom = ({ isCreate }: TCreateJoinRoomProps) => {
         },
     });
 
-    useEffect(() => {
-        form.setValue('roomId', isCreate ? uuid4().replace(/-/g, '') : '');
-    }, [form, isCreate]);
-
     const navigate = useNavigate();
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         window.localStorage.setItem('username', values.username);
-        if (isCreate) {
-            localStorage.setItem(
-                'hostedRooms',
-                [...(localStorage.getItem('hostedRooms')?.split(',') ?? []), values.roomId].join(
-                    ',',
-                ),
-            );
-        }
         useRoomStore.setState({
             roomId: values.roomId,
             myUsername: values.username,
-            isHost: isCreate,
+            isHost: false,
         });
         navigate({
-            to: '/room/$roomId',
+            to: '/rooms/$roomId',
             params: { roomId: values.roomId },
         });
     }
 
     return (
-        <Card className="p-4 shadow-md h-96">
+        <Card className="p-4 shadow-md w-[400px] h-96">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="h-full flex flex-col gap-3 justify-between"
                 >
-                    <div className="space-y-8">
+                    <div className="space-y-4">
                         <FormField
                             control={form.control}
                             name="username"
@@ -96,8 +78,6 @@ export const CreateJoinRoom = ({ isCreate }: TCreateJoinRoomProps) => {
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            withCopy={isCreate}
-                                            disabled={isCreate}
                                             onCopy={() =>
                                                 toast('Room id copied!', {
                                                     duration: 1500,
@@ -107,17 +87,15 @@ export const CreateJoinRoom = ({ isCreate }: TCreateJoinRoomProps) => {
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        {isCreate
-                                            ? 'Provide this id the interviewee'
-                                            : 'Room id is provided by the interviewer'}
+                                        Room id is provided by the interviewer
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                     </div>
-                    <Button className="w-full" type="submit">
-                        {isCreate ? 'Create' : 'Join'}
+                    <Button className="w-full mt-3" type="submit">
+                        Join room
                     </Button>
                 </form>
             </Form>

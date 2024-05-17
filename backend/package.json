@@ -1,0 +1,43 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "dev": "tsx --watch src/main.ts",
+        "check-types": "tsc --noEmit",
+        "build": "rm -rf ./dist/* && swc ./src/* -d ./dist --config-file .swcrc && fix-esm-import-path ./dist",
+        "start": "node dist/src/main.js",
+        "drizzle-push": "drizzle-kit push",
+        "drizzle-generate": "drizzle-kit generate",
+        "drizzle-migrate": "tsx tools/migrate.ts",
+        "drizzle-studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "@fastify/cookie": "^9.3.1",
+        "@lucia-auth/adapter-drizzle": "^1.0.7",
+        "@t3-oss/env-core": "^0.10.1",
+        "@trpc/server": "11.0.0-rc.370",
+        "argon2": "^0.40.1",
+        "dockerode": "^4.0.2",
+        "dotenv": "^16.4.5",
+        "drizzle-orm": "^0.30.10",
+        "fastify": "^4.27.0",
+        "jsonwebtoken": "^9.0.2",
+        "lucia": "^3.2.0",
+        "postgres": "^3.4.4",
+        "superjson": "^2.2.1",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@swc/cli": "^0.3.12",
+        "@swc/core": "^1.5.5",
+        "@types/dockerode": "^3.3.29",
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/node": "^20.12.11",
+        "drizzle-kit": "^0.21.1",
+        "fix-esm-import-path": "^1.5.0",
+        "tsx": "^4.10.2",
+        "typescript": "^5.4.5"
+    }
+}

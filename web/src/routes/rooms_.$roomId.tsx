@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/componen
 import { YjsProvider } from '~/components/contexts/YjsContext';
 import { defaultRoom, useRoomStore } from '~/stores/room';
 import { UsersProvider } from '~/components/contexts/UsersContext';
+import { Logo } from '~/components/Logo';
 
 const roomParamsSchema = z.object({
     roomId: z.string().min(1),
@@ -32,9 +33,7 @@ const Room = () => {
         return (
             <main className="min-h-screen grid place-items-center">
                 <div>
-                    <h1 className="w-full text-center font-semibold text-3xl mb-3">
-                        <Link to="/">Unnamed interview platform</Link>
-                    </h1>
+                    <Logo isLink isCentered className="mb-3" />
                     <EnterUsernameCard
                         onSubmit={myUsername => useRoomStore.setState({ myUsername })}
                     />
@@ -48,9 +47,7 @@ const Room = () => {
             <UsersProvider userName={room.myUsername}>
                 <main className="h-screen flex flex-col">
                     <div className="flex justify-between border-b dark:border-neutral-800 px-3 py-2">
-                        <h1 className="font-semibold text-lg leading-6">
-                            <Link to="/">Unnamed interview platform</Link>
-                        </h1>
+                        <Logo isSmall isLink />
                         <Participants />
                     </div>
                     <div className="flex-1">
@@ -75,7 +72,7 @@ const Room = () => {
     );
 };
 
-export const Route = createFileRoute('/room/$roomId')({
+export const Route = createFileRoute('/rooms/$roomId')({
     parseParams: params => roomParamsSchema.parse(params),
     onError: () => window.location.replace('/'),
     component: Room,

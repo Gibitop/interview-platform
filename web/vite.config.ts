@@ -13,9 +13,12 @@ export default defineConfig({
         },
         host: '127.0.0.1',
         proxy: {
+            '/api': {
+                target: 'http://localhost:3000',
+            },
             '/ws': {
                 ws: true,
-                target: 'ws://localhost:4444',
+                target: 'ws://localhost:3000',
             },
         },
     },

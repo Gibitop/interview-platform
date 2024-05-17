@@ -11,18 +11,24 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as RoomsImport } from './routes/rooms'
 import { Route as IndexImport } from './routes/index'
-import { Route as RoomRoomIdImport } from './routes/room.$roomId'
+import { Route as RoomsRoomIdImport } from './routes/rooms_.$roomId'
 
 // Create/Update Routes
+
+const RoomsRoute = RoomsImport.update({
+  path: '/rooms',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const RoomRoomIdRoute = RoomRoomIdImport.update({
-  path: '/room/$roomId',
+const RoomsRoomIdRoute = RoomsRoomIdImport.update({
+  path: '/rooms/$roomId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -34,8 +40,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/room/$roomId': {
-      preLoaderRoute: typeof RoomRoomIdImport
+    '/rooms': {
+      preLoaderRoute: typeof RoomsImport
+      parentRoute: typeof rootRoute
+    }
+    '/rooms/$roomId': {
+      preLoaderRoute: typeof RoomsRoomIdImport
       parentRoute: typeof rootRoute
     }
   }
@@ -43,6 +53,10 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([IndexRoute, RoomRoomIdRoute])
+export const routeTree = rootRoute.addChildren([
+  IndexRoute,
+  RoomsRoute,
+  RoomsRoomIdRoute,
+])
 
 /* prettier-ignore-end */

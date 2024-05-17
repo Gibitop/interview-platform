@@ -31,3 +31,6 @@ dist-ssr
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# JWT public key
+jwt-public-key.pem
