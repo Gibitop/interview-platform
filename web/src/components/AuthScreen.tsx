@@ -1,23 +1,18 @@
 import omit from 'lodash/omit';
 import { Logo } from './Logo';
-import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { Card } from './ui/card';
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from './ui/form';
 import { Input } from './ui/input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { trpc } from '~/lib/trpc';
-import { Button } from './ui/button';
 import { Loader2 } from 'lucide-react';
+import { SimpleTabs } from './simple/SimpleTabs';
+import { SimpleForm } from './simple/SimpleForm';
+import { SimpleFormField } from './simple/SimpleFormField';
+import { toast } from 'sonner';
+import { useInvalidateProtected } from '~/hooks/trpc/useInvalidateProtected';
+import { useLogin } from '~/hooks/trpc/useLogin';
 
 const formSchema = z.discriminatedUnion('tab', [
     z.object({
@@ -40,11 +35,7 @@ export const AuthScreen = ({ children }: React.PropsWithChildren) => {
     });
     const selectedTab = form.watch('tab');
 
-    const trpcUtils = trpc.useUtils();
-    const invalidateProtected = () => {
-        trpcUtils.auth.getSelf.invalidate();
-        trpcUtils.rooms.invalidate();
-    };
+    const invalidateProtected = useInvalidateProtected();
 
     const { error: selfError, isLoading: isLoadingSelf } = trpc.auth.getSelf.useQuery(undefined, {
         retry: 0,
@@ -55,9 +46,7 @@ export const AuthScreen = ({ children }: React.PropsWithChildren) => {
     const { mutate: register, isPending: isRegistering } = trpc.auth.register.useMutation({
         onSuccess: invalidateProtected,
     });
-    const { mutate: login, isPending: isLoggingIn } = trpc.auth.login.useMutation({
-        onSuccess: invalidateProtected,
-    });
+    const { mutate: login, isPending: isLoggingIn } = useLogin();
 
     if (isLoadingSelf) {
         return (
@@ -70,109 +59,69 @@ export const AuthScreen = ({ children }: React.PropsWithChildren) => {
         return children;
     }
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = (values: z.infer<typeof formSchema>) => {
         if (values.tab === 'login') {
-            login(omit(values, 'tab'));
+            login(omit(values, 'tab'), { onError: () => toast.error('Could not sign-in') });
         } else {
-            register(omit(values, 'tab'));
+            register(omit(values, 'tab'), { onError: () => toast.error('Could not sign-up') });
         }
     };
 
     const isLoading = isRegistering || isLoggingIn || isLoadingRegistrationOpen;
 
     return (
-        <main className="min-h-screen grid place-items-center">
-            <div className="flex flex-col gap-3">
-                <Logo isLink isCentered className="mb-3" />
-                <Tabs
+        <main className="m-auto mt-[25vh] mb-6">
+            <div className="flex flex-col items-center gap-3">
+                <Logo isCentered className="mb-3" />
+                <SimpleTabs
+                    options={[
+                        { label: 'Sign in', value: 'login' },
+                        { label: 'Sign up', value: 'register' },
+                    ]}
                     value={selectedTab}
-                    onValueChange={newTab => form.setValue('tab', newTab as typeof selectedTab)}
+                    onChange={val => form.setValue('tab', val)}
                     className="w-[400px]"
-                >
-                    <TabsList className="grid w-full grid-cols-2 mb-3">
-                        <TabsTrigger value={'login' satisfies typeof selectedTab}>
-                            Sign in
-                        </TabsTrigger>
-                        <TabsTrigger value={'register' satisfies typeof selectedTab}>
-                            Sign up
-                        </TabsTrigger>
-                    </TabsList>
-                    <Card className="p-4 shadow-md">
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="h-full flex flex-col gap-3 justify-between"
-                            >
-                                <div className="space-y-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="username"
-                                        disabled={selectedTab === 'register' && !isRegistrationOpen}
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Username</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="password"
-                                        disabled={selectedTab === 'register' && !isRegistrationOpen}
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Password</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    {selectedTab === 'register' && (
-                                        <FormField
-                                            control={form.control}
-                                            name="name"
-                                            disabled={
-                                                selectedTab === 'register' && !isRegistrationOpen
-                                            }
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Your name</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} />
-                                                    </FormControl>
-                                                    <FormDescription>
-                                                        Will be displayed to other participants
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    )}
-                                </div>
-
-                                <Button
-                                    className="w-full mt-3"
-                                    type="submit"
-                                    disabled={
-                                        isLoading ||
-                                        (selectedTab === 'register' && !isRegistrationOpen)
-                                    }
-                                >
-                                    {selectedTab === 'login'
-                                        ? 'Sign in'
-                                        : isRegistrationOpen
-                                          ? 'Sign up'
-                                          : 'Registration is closed'}
-                                </Button>
-                            </form>
-                        </Form>
-                    </Card>
-                </Tabs>
+                />
+                <Card className="p-4 w-[400px]">
+                    <SimpleForm
+                        form={form}
+                        onSubmitSuccess={handleSubmit}
+                        isLoading={isLoading}
+                        submitButtonContent={
+                            selectedTab === 'login'
+                                ? 'Sign in'
+                                : isRegistrationOpen
+                                  ? 'Sign up'
+                                  : 'Registration is closed'
+                        }
+                    >
+                        <SimpleFormField
+                            control={form.control}
+                            name="username"
+                            label="Username"
+                            disabled={selectedTab === 'register' && !isRegistrationOpen}
+                            render={({ field }) => <Input {...field} />}
+                        />
+                        <SimpleFormField
+                            control={form.control}
+                            name="password"
+                            label="Password"
+                            disabled={selectedTab === 'register' && !isRegistrationOpen}
+                            render={({ field }) => <Input type="password" {...field} />}
+                        />
+                        {selectedTab === 'register' && (
+                            <SimpleFormField
+                                className="animate-in fade-in"
+                                control={form.control}
+                                name="name"
+                                label="Your name"
+                                description="Will be displayed to other participants"
+                                disabled={selectedTab === 'register' && !isRegistrationOpen}
+                                render={({ field }) => <Input {...field} />}
+                            />
+                        )}
+                    </SimpleForm>
+                </Card>
             </div>
         </main>
     );

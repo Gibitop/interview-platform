@@ -1,6 +1,11 @@
 import { z } from 'zod';
-import { protectedProcedure, t } from '../utils';
-import { getOffset, makeResponsePagination, PER_PAGE_DEFAULT, zRequestPagination, type TResponsePagination } from '../../common/pagination';
+import { protectedProcedure, publicProcedure, t } from '../utils';
+import {
+    getOffset,
+    makeResponsePagination,
+    PER_PAGE_DEFAULT,
+    zRequestPagination,
+} from '../../common/pagination';
 import { db } from '../../db/index';
 import { roomsTable } from '../../db/tables/roomsTable';
 import { and, count, desc, eq } from 'drizzle-orm';
@@ -10,6 +15,7 @@ import { ROOM_TYPES } from '../../common/roomTypes';
 import { createContainer, deleteContainer } from '../../common/dockerode';
 import jwt from 'jsonwebtoken';
 import { readFile } from 'fs/promises';
+import pick from 'lodash/pick';
 
 const START_PORT = 4000;
 
@@ -145,7 +151,13 @@ export const roomsRouter = t.router({
             }),
         )
         .mutation(async ({ ctx, input }) => {
-            await db.insert(usersRoomsTable).values({ ...input, userId: ctx.user.id });
+            await db
+                .insert(usersRoomsTable)
+                .values({ ...input, userId: ctx.user.id })
+                .onConflictDoUpdate({
+                    target: [usersRoomsTable.roomId, usersRoomsTable.userId],
+                    set: { isStealthy: input.isStealthy },
+                });
         }),
 
     getHostJwt: protectedProcedure
@@ -156,8 +168,8 @@ export const roomsRouter = t.router({
                 .from(usersRoomsTable)
                 .where(
                     and(
+                        eq(usersRoomsTable.roomId, input.roomId),
                         eq(usersRoomsTable.userId, ctx.user.id),
-                        eq(usersRoomsTable.roomId, ctx.user.id),
                     ),
                 );
             if (!membership) {
@@ -232,5 +244,31 @@ export const roomsRouter = t.router({
             // TODO: Remove recording data
 
             await db.delete(roomsTable).where(eq(roomsTable.id, input.roomId));
+        }),
+
+    getPublicInfo: publicProcedure
+        .input(z.object({ roomId: z.string().uuid() }))
+        .query(async ({ input }) => {
+            const [room] = await db
+                .select()
+                .from(roomsTable)
+                .where(and(eq(roomsTable.id, input.roomId), eq(roomsTable.isActive, true)));
+            if (!room) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            const out = pick(room, 'wsPort', 'httpPort', 'type');
+
+            return out;
+        }),
+
+    getHostInfo: protectedProcedure
+        .input(z.object({ roomId: z.string().uuid() }))
+        .query(async ({ ctx, input }) => {
+            const [room] = await db
+                .select()
+                .from(roomsTable)
+                .where(eq(roomsTable.id, input.roomId));
+            if (!room) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            return room;
         }),
 });

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: Canvas;
+            color: CanvasText;
+            color-scheme: light dark;
+        }
+
+        * {
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <input type="text" id="token" placeholder="token" />
+    </div>
+    <div>
+        <label>
+            <input type="checkbox" id="spectatorMode" />
+            Spectator mode
+        </label>
+    </div>
+    <div>
+        <button type="button" id="connect">Connect</button>
+        <button type="button" id="disconnect">Disconnect</button>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

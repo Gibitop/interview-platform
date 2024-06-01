@@ -59,7 +59,7 @@ export const authRouter = t.router({
                 throw new TRPCError({ code: 'UNAUTHORIZED' });
             }
 
-            if (!await verify(user.hashedPassword, input.password)) {
+            if (!(await verify(user.hashedPassword, input.password))) {
                 throw new TRPCError({ code: 'UNAUTHORIZED' });
             }
 
@@ -79,7 +79,7 @@ export const authRouter = t.router({
             throw new TRPCError({ code: 'UNAUTHORIZED' });
         }
         const [user] = await db
-            .select()
+            .select({ id: usersTable.id, name: usersTable.name, username: usersTable.username })
             .from(usersTable)
             .where(eq(usersTable.id, ctx.session.userId));
         if (!user) {

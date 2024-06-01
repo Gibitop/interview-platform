@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ColumnDef } from '@tanstack/react-table';
+import { DoorOpen, Link2, Plus } from 'lucide-react';
 import { AuthScreen } from '~/components/AuthScreen';
 import { CreateRoomDialog } from '~/components/CreateRoomDialog';
 import { Logo } from '~/components/Logo';
@@ -11,25 +11,67 @@ import { usePagination } from '~/hooks/usePagination';
 import { trpc } from '~/lib/trpc';
 import { AppRouter } from '../../../backend/src/trpc/router';
 import { DataTable } from '~/components/ui/data-table';
+import { SimpleTooltip } from '~/components/simple/SimpleTooltip';
+import { Badge } from '~/components/ui/badge';
+import { toast } from 'sonner';
+import { uuidToHumanId } from '~/utils/uuid';
+
+const dateFormatter = new Intl.DateTimeFormat(['ru-RU']);
 
 const columns: ColumnDef<
     AppRouter['rooms']['getMy']['_def']['$types']['output']['rooms'][number]
 >[] = [
     {
-        accessorKey: 'name',
         header: 'Name',
+        accessorKey: 'name',
     },
     {
-        accessorKey: 'type',
         header: 'Type',
+        accessorKey: 'type',
     },
     {
-        accessorKey: 'isActive',
         header: 'Active',
+        id: 'active',
+        cell: ({ row }) => (
+            <Badge variant={row.original.isActive ? 'positive' : 'destructive'}>
+                {row.original.isActive ? 'Active' : 'Inactive'}
+            </Badge>
+        ),
     },
     {
-        accessorFn: ({ createdAt }) => new Intl.DateTimeFormat(['gb'], {}).format(createdAt),
         header: 'Created at',
+        accessorFn: ({ createdAt }) => dateFormatter.format(createdAt),
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => {
+            const handleCopyLink = () => {
+                navigator.clipboard.writeText(`${window.location.origin}/rooms/${row.original.id}`);
+                toast.success('Room link copied!');
+            };
+
+            return (
+                <div className="space-x-2 text-end">
+                    <SimpleTooltip tipContent="Join the room">
+                        <Button size="xs" variant="outline" className="size-7 p-1" asChild>
+                            <Link to={`/rooms/${uuidToHumanId(row.original.id)}`}>
+                                <DoorOpen />
+                            </Link>
+                        </Button>
+                    </SimpleTooltip>
+                    <SimpleTooltip tipContent="Copy link">
+                        <Button
+                            size="xs"
+                            variant="outline"
+                            className="size-7 p-1"
+                            onClick={handleCopyLink}
+                        >
+                            <Link2 />
+                        </Button>
+                    </SimpleTooltip>
+                </div>
+            );
+        },
     },
 ];
 
@@ -39,19 +81,15 @@ const AuthedComponent = () => {
     const { data, isLoading } = trpc.rooms.getMy.useQuery({ pagination: requestPagination });
     useSetResponsePagination(data?.pagination);
 
-    const table = useReactTable({
-        data: data?.rooms ?? [],
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
-
     return (
         <>
-            <nav className="py-2 px-3 flex items-center justify-between border-b dark:border-neutral-800">
-                <Logo isSmall />
-                <ProfileButton withName />
+            <nav className="border-b dark:border-neutral-800">
+                <div className="py-2 px-3 container flex items-center justify-between">
+                    <Logo isSmall />
+                    <ProfileButton withName />
+                </div>
             </nav>
-            <main className="p-4">
+            <main className="p-4 container">
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="font-semibold text-3xl">My rooms</h2>
                     <CreateRoomDialog>
@@ -61,12 +99,12 @@ const AuthedComponent = () => {
                         </Button>
                     </CreateRoomDialog>
                 </div>
-                <DataTable columns={columns} data={data?.rooms ?? []} />
+                <DataTable isLoading={isLoading} columns={columns} data={data?.rooms ?? []} />
                 <SimplePagination
                     pages={responsePagination.pages}
                     page={responsePagination.page}
                     setPage={setPage}
-                    className='mt-3'
+                    className="mt-3"
                 />
             </main>
         </>

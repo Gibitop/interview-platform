@@ -1,22 +1,42 @@
-import { Loader2, LogIn, LogOut, User } from 'lucide-react';
+import { LogIn, LogOut } from 'lucide-react';
 import { trpc } from '~/lib/trpc';
 import { Button } from './ui/button';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { Skeleton } from './ui/skeleton';
 
 type TProfileButtonProps = {
     withName?: boolean;
 };
 
 export const ProfileButton = ({ withName }: TProfileButtonProps) => {
-    const { data, error, isLoading } = trpc.auth.getSelf.useQuery();
+    const navigate = useNavigate();
+
+    const { data, error, isLoading } = trpc.auth.getSelf.useQuery(undefined, { retry: 0 });
+
+    const trpcUtils = trpc.useUtils();
+    const { mutate: logout } = trpc.auth.logout.useMutation({
+        onSuccess: () => {
+            trpcUtils.auth.getSelf.invalidate();
+            trpcUtils.rooms.invalidate();
+            navigate({ to: '/' });
+        },
+    });
 
     if (isLoading) {
-        return <Loader2 className="animate-spin" />;
+        return (
+            <div className="flex items-center gap-2">
+                {withName && <Skeleton className="h-6 w-48" />}
+                <Skeleton className="h-6 aspect-square" />
+            </div>
+        );
     }
 
     if (error) {
         return (
-            <Button>
-                <LogIn />
+            <Button variant="ghost" size="xs" className="aspect-square p-1" asChild>
+                <Link to="/rooms">
+                    <LogIn />
+                </Link>
             </Button>
         );
     }
@@ -25,7 +45,12 @@ export const ProfileButton = ({ withName }: TProfileButtonProps) => {
         return (
             <div className="flex items-center gap-2">
                 {withName && <span>{data.name}</span>}
-                <Button variant="ghost" size="xs" className="aspect-square p-1">
+                <Button
+                    variant="ghost"
+                    size="xs"
+                    className="aspect-square p-1"
+                    onClick={() => logout()}
+                >
                     <LogOut />
                 </Button>
             </div>

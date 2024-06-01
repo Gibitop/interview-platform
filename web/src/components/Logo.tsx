@@ -4,14 +4,22 @@ import { cn } from '~/utils/shadcn';
 type TLogoProps = {
     isSmall?: boolean;
     isLink?: boolean;
+    to?: string;
     isCentered?: boolean;
     className?: string;
 };
 
-const Wrapper = ({ isLink, children }: { isLink?: boolean; children: React.ReactNode }) =>
-    isLink ? <Link to="/">{children}</Link> : <>{children}</>;
+const Wrapper = ({
+    isLink,
+    children,
+    to = '/',
+}: {
+    isLink?: boolean;
+    children: React.ReactNode;
+    to?: string;
+}) => (isLink ? <Link to={to}>{children}</Link> : <>{children}</>);
 
-export const Logo = ({ isSmall, isLink, isCentered, className }: TLogoProps) => {
+export const Logo = ({ isSmall, isLink, isCentered, className, to }: TLogoProps) => {
     return (
         <h1
             className={cn(
@@ -22,9 +30,17 @@ export const Logo = ({ isSmall, isLink, isCentered, className }: TLogoProps) => 
                 className,
             )}
         >
-            <Wrapper isLink={isLink}>
+            <Wrapper isLink={isLink} to={to}>
                 Interview platform
-                <sup className="text-xs ml-1">beta</sup>
+                <sup
+                    className={cn(
+                        'text-xs',
+                        isSmall && 'ml-0.5 -top-1.5',
+                        !isSmall && 'ml-1 -top-3',
+                    )}
+                >
+                    beta
+                </sup>
             </Wrapper>
         </h1>
     );

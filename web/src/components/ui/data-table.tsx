@@ -1,13 +1,19 @@
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
+import { Loader2 } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    isLoading?: boolean;
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({
+    columns,
+    isLoading,
+    data,
+}: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
         columns,
@@ -36,7 +42,15 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
+                    {isLoading && (
+                        <TableRow>
+                            <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <Loader2 className="animate-spin" />
+                            </TableCell>
+                        </TableRow>
+                    )}
+                    {!isLoading &&
+                        table.getRowModel().rows?.length &&
                         table.getRowModel().rows.map(row => (
                             <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                 {row.getVisibleCells().map(cell => (
@@ -45,8 +59,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                                     </TableCell>
                                 ))}
                             </TableRow>
-                        ))
-                    ) : (
+                        ))}
+                    {!isLoading && !table.getRowModel().rows?.length && (
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
                                 No results.

@@ -1,0 +1,26 @@
+# v2.0.0
+- Range selection
+- Reading from a file (on fs update)
+- Switching files
+- Containerisation
+- Insider security
+- File uploads
+
+# v2.0.1
+- Offline recovery
+- Usage docs
+- Refactoring
+- Bug fixes
+- Memory leak fixes
+- Bundle optimizations
+
+# v2.*
+- Other languages support
+- Iframe
+- Board
+- Recoring
+- Replaying
+- Chat
+- Notes
+- SAML
+- Audio recording

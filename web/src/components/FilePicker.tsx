@@ -1,4 +1,3 @@
-import { useRoomStore } from '~/stores/room';
 import {
     Select,
     SelectContent,
@@ -9,18 +8,16 @@ import {
     SelectValue,
 } from './ui/select';
 import { useEffect, useState } from 'react';
-import { useWebContainer } from '~/hooks/useWebContainer';
 
 export const FilePicker = () => {
-    const { isHost, activeFile } = useRoomStore(s => ({
-        isHost: s.isHost,
-        activeFile: s.activeFile,
-    }));
+    const isHost = false;
+    const activeFile = '';
 
     const [options, setOptions] = useState<string[]>([activeFile]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const wc = useWebContainer(!isHost);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wc: any = null;
 
     useEffect(() => {
         if (!wc || !isHost) return;
@@ -42,7 +39,7 @@ export const FilePicker = () => {
             disabled={isLoading}
             defaultValue={activeFile}
             value={activeFile}
-            onValueChange={value => useRoomStore.setState({ activeFile: value })}
+            // onValueChange={value => useRoomStore.setState({ activeFile: value })}
         >
             <SelectTrigger className="w-[180px] h-7">
                 <SelectValue placeholder="Pick a file" />

@@ -42,7 +42,7 @@ export const SimplePagination: React.FC<TSimplePaginationProps> = ({
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
-                        className="cursor-pointer"
+                        className={cn(page > 1 && 'cursor-pointer', page <= 1 && 'opacity-50')}
                         onClick={() => setPage(Math.max(page - 1, 1))}
                     />
                 </PaginationItem>
@@ -61,7 +61,10 @@ export const SimplePagination: React.FC<TSimplePaginationProps> = ({
 
                 <PaginationItem>
                     <PaginationNext
-                        className="cursor-pointer"
+                        className={cn(
+                            page < pages && 'cursor-pointer',
+                            page >= pages && 'opacity-50',
+                        )}
                         onClick={() => setPage(Math.min(page + 1, pages))}
                     />
                 </PaginationItem>

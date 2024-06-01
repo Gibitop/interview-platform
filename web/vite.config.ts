@@ -12,6 +12,7 @@ export default defineConfig({
             'Cross-Origin-Opener-Policy': 'same-origin',
         },
         host: '127.0.0.1',
+        port: 5173,
         proxy: {
             '/api': {
                 target: 'http://localhost:3000',
@@ -20,11 +21,16 @@ export default defineConfig({
                 ws: true,
                 target: 'ws://localhost:3000',
             },
+            '/public': {
+                target: 'http://localhost:5173',
+                rewrite: path => path.replace(/^\/public/, ''),
+            },
         },
     },
     resolve: {
         alias: {
             '~': path.resolve(__dirname, './src'),
+            '~public': path.resolve(__dirname, './public'),
         },
     },
 });
