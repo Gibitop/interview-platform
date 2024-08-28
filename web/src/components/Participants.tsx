@@ -1,5 +1,5 @@
 import { Crown, Eye } from 'lucide-react';
-import { useRoomContext } from './contexts/RoomContext';
+import { useRoomContext } from './contexts/useRoomContext';
 import { cn } from '~/utils/shadcn';
 import type { Role } from '../../../insider/src/sockets';
 
@@ -48,7 +48,7 @@ export const Participants = () => {
     return (
         <div>
             <ul className="flex gap-3">
-                {roomContext.awareness.map(({ id, isFocused, role, color, name }) => {
+                {roomContext.users.map(({ id, isFocused, role, color, name }) => {
                     const Icon = RoleIconMap[role];
 
                     return (

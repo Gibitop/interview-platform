@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 
-export const useTerminal = () => {
+export const useXterm = () => {
     const elRef = useRef<HTMLDivElement>(null);
     const terminalRef = useRef<Terminal | null>(null);
 

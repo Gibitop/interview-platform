@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 import prettier from 'prettier/standalone';
 import prettierPluginEstree from 'prettier/plugins/estree';
 import prettierPluginTypeScript from 'prettier/plugins/typescript';
-import { useRoomContext } from './contexts/RoomContext';
+import { useRoomContext } from './contexts/useRoomContext';
 
 import { getHighlighter } from 'shiki/bundle/web';
 import { shikiToMonaco } from '@shikijs/monaco';
@@ -100,26 +100,26 @@ export const Editor = () => {
 
     const isSpectator = useRoomStore(data => data?.role === 'host' && data.isSpectator);
     const roomContext = useRoomContext();
-    const changeMyAwareness = roomContext?.changeMyAwareness;
+    const changeMyUser = roomContext?.changeMyUser;
 
     // Send cursor position to the server
     useEffect(() => {
-        if (!changeMyAwareness || !monacoEditor) return;
+        if (!changeMyUser || !monacoEditor) return;
 
         monacoEditor.onDidChangeCursorPosition(e => {
-            changeMyAwareness({
+            changeMyUser({
                 line: e.position.lineNumber,
                 char: e.position.column,
             });
         });
-    }, [changeMyAwareness, monacoEditor]);
+    }, [changeMyUser, monacoEditor]);
 
     // Draw user cursors
     useEffect(() => {
-        if (!roomContext?.awareness || !monacoEditor) return;
+        if (!roomContext?.users || !monacoEditor) return;
 
         const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-        for (const { id, line, char } of roomContext.awareness) {
+        for (const { id, line, char } of roomContext.users) {
             if (id === roomContext.myId) continue;
 
             decorations.push({
@@ -137,7 +137,7 @@ export const Editor = () => {
         return () => {
             collection.clear();
         };
-    }, [monacoEditor, roomContext?.awareness, roomContext?.myId]);
+    }, [monacoEditor, roomContext?.users, roomContext?.myId]);
 
     const handleMonacoMount: OnMount = (editor, monaco) => {
         setMonacoEditor(editor);
@@ -193,9 +193,12 @@ export const Editor = () => {
         );
 
         editor.setModel(codeModel);
+    };
 
-        editor.onDidChangeModelContent(event => {
-            if (roomContext?.getActiveFileContent() === codeModel.getValue()) return;
+    useEffect(() => {
+        if (!monacoEditor || !roomContext) return;
+        monacoEditor.onDidChangeModelContent(event => {
+            if (roomContext.getActiveFileContent() === monacoEditor.getModel()?.getValue()) return;
 
             roomContext?.updateActiveFileContent((ins, del) => {
                 event.changes
@@ -210,7 +213,7 @@ export const Editor = () => {
                     });
             });
         });
-    };
+    }, [monacoEditor, roomContext]);
 
     useEffect(() => {
         if (!monacoEditor) return;
@@ -224,7 +227,7 @@ export const Editor = () => {
     const styleSheet = useMemo(() => {
         let cursorStyles = '';
 
-        for (const { id, name, color } of roomContext?.awareness ?? []) {
+        for (const { id, name, color } of roomContext?.users ?? []) {
             cursorStyles += `
                 .yRemoteSelection-${id},
                 .yRemoteSelectionHead-${id}  {
@@ -237,7 +240,7 @@ export const Editor = () => {
         }
 
         return { __html: cursorStyles };
-    }, [roomContext?.awareness]);
+    }, [roomContext?.users]);
 
     return (
         <div className="flex flex-col h-full">

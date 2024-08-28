@@ -1,11 +1,11 @@
-import { useTerminal } from '~/hooks/useTerminal';
+import { useXterm } from '~/hooks/useXterm';
 import { useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import '@xterm/xterm/css/xterm.css';
-import { useRoomContext } from './contexts/RoomContext';
+import { useRoomContext } from './contexts/useRoomContext';
 
 export const Terminal = () => {
-    const { elRef, terminalRef } = useTerminal();
+    const { elRef, terminalRef } = useXterm();
 
     const isHost = false;
 

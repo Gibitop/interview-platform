@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { Editor } from '~/components/Editor';
 import { Participants } from '~/components/Participants';
 import { Terminal } from '~/components/Terminal';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
+import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { Logo } from '~/components/Logo';
 import { ProfileButton } from '~/components/ProfileButton';
 import { trpc } from '~/lib/trpc';
@@ -14,7 +14,7 @@ import { humanIdToUuid } from '~/utils/uuid';
 import { useRoomStore } from '~/stores/room';
 import { Button } from '~/components/ui/button';
 import { Link } from '@tanstack/react-router';
-import { RoomProvider } from '~/components/contexts/RoomContext';
+import { RoomProvider } from '~/components/contexts/useRoomContext';
 
 const roomParamsSchema = z.object({
     roomId: z.string().min(1),
