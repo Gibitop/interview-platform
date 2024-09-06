@@ -1,7 +1,7 @@
 import { Crown, Eye } from 'lucide-react';
 import { useRoomContext } from './contexts/useRoomContext';
 import { cn } from '~/utils/shadcn';
-import type { Role } from '../../../insider/src/sockets';
+import type { Role } from '~insider/controllers/users';
 
 type RoleIconProps = {
     isFocused: boolean;

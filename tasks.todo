@@ -1,24 +1,27 @@
 # v2.0.0
-- Range selection
-- Reading from a file (on fs update)
-- Switching files
++ Range selection
++ Switching files
++ Watch FS
++ File uploads
++ Reading from a file (on fs update)
++ Validate access
++ Clear listeners
++ Validate event arguments
++ Check JWT
 - Containerisation
 - Insider security
-- File uploads
 
 # v2.0.1
-- Offline recovery
 - Usage docs
-- Refactoring
-- Bug fixes
-- Memory leak fixes
 - Bundle optimizations
 
 # v2.*
+- Offline recovery
+- .ipignore - ignore files from being available (eg: node_modules/*)
 - Other languages support
 - Iframe
 - Board
-- Recoring
+- Recording
 - Replaying
 - Chat
 - Notes

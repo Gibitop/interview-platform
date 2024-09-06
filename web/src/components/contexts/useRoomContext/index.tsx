@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { trpc } from '~/lib/trpc';
 import { useRoomStore } from '~/stores/room';
@@ -8,7 +8,9 @@ import { useRoomUsers } from './useRoomUsers';
 import { useActiveFileContent } from './useActiveFileContent';
 import { useCandidateCopy } from './useCandidateCopy';
 import { useTerminal } from './useTerminal';
-import type { MyUserChangeRequest, User } from '~/../../../insider/src/controllers/users';
+import type { ChangeMyUserRequest, User } from '~insider/controllers/users';
+import { useActiveFilePath } from './useActiveFilePath';
+import { useUploadFile } from './useUploadFile';
 
 export type TRoomContextProviderProps = {
     wsPort: number;
@@ -18,9 +20,14 @@ export type TRoomContextProviderProps = {
 type TRoomContext = {
     myId: string;
     users: User[];
-    getActiveFileContent: () => string;
-    changeMyUser: (data: MyUserChangeRequest) => void;
+    changeMyUser: (data: ChangeMyUserRequest) => void;
     reportCopy: () => void;
+    activeFilePath: string;
+    availableFiles: string[];
+    uploadFile: (file: File) => void;
+    changeActiveFilePath: (newPath: string) => void;
+    activeFileContent: string;
+    getActiveFileContent: () => string;
     updateActiveFileContent: (cb: (ins: StrApi['ins'], del: StrApi['del']) => void) => void;
     writeToTerminal: (data: string) => void;
     addTerminalOutputListener: (cb: (data: string) => void) => void;
@@ -63,12 +70,16 @@ export const RoomProvider = ({ wsPort, children }: TRoomContextProviderProps) =>
         roomStore?.role,
     );
 
-    const { getActiveFileContent, updateActiveFileContent } = useActiveFileContent(socket);
+    const { activeFilePath, availableFiles, changeActiveFilePath } = useActiveFilePath(socket);
+    const { activeFileContent, getActiveFileContent, updateActiveFileContent } =
+        useActiveFileContent(socket);
 
     const { reportCopy } = useCandidateCopy(socket, users, roomStore?.role);
 
     const { addTerminalOutputListener, removeTerminalOutputListener, writeToTerminal } =
         useTerminal(socket);
+
+    const { uploadFile } = useUploadFile(socket);
 
     useEffect(() => {
         if (socket && !socket.connected) {
@@ -76,32 +87,28 @@ export const RoomProvider = ({ wsPort, children }: TRoomContextProviderProps) =>
         }
     }, [socket]);
 
-    const providerValue = useMemo(
-        () => ({
-            users,
-            getActiveFileContent,
-            changeMyUser,
-            reportCopy,
-            updateActiveFileContent,
-            writeToTerminal,
-            myId: socket?.id ?? '',
-            addTerminalOutputListener,
-            removeTerminalOutputListener,
-        }),
-        [
-            users,
-            getActiveFileContent,
-            changeMyUser,
-            reportCopy,
-            updateActiveFileContent,
-            writeToTerminal,
-            socket?.id,
-            addTerminalOutputListener,
-            removeTerminalOutputListener,
-        ],
+    return (
+        <roomContext.Provider
+            value={{
+                myId: socket?.id ?? '',
+                users,
+                changeMyUser,
+                reportCopy,
+                activeFilePath,
+                availableFiles,
+                uploadFile,
+                changeActiveFilePath,
+                activeFileContent,
+                getActiveFileContent,
+                updateActiveFileContent,
+                writeToTerminal,
+                addTerminalOutputListener,
+                removeTerminalOutputListener,
+            }}
+        >
+            {children}
+        </roomContext.Provider>
     );
-
-    return <roomContext.Provider value={providerValue}>{children}</roomContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components

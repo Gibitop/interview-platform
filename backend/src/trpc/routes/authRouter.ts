@@ -8,6 +8,10 @@ import { lucia } from '../../common/lucia';
 import { TRPCError } from '@trpc/server';
 import { env } from '../../common/env';
 
+// This import is needed so TSC does not complain when this file is imported from another project
+import '@fastify/cookie';
+
+
 export const authRouter = t.router({
     register: publicProcedure
         .input(

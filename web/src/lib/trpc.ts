@@ -8,7 +8,7 @@ import {
 } from '@trpc/react-query';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
-import type { AppRouter } from '../../../backend/src/trpc/router';
+import type { AppRouter } from '~backend/trpc/router';
 
 export const trpcOptions: CreateTRPCClientOptions<AppRouter> = {
     links: [

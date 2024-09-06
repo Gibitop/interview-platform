@@ -114,11 +114,9 @@ export const JoinRoomScreen = ({ roomId, withSignInButton, onReady }: TJoinRoomS
                 roomId: values.roomId,
                 role: 'host',
                 isSpectator: !!values.isSpectator,
-                // TODO: get host jwt
-                // token: await trpcVanilla.rooms.getHostJwt.query({
-                //     roomId: humanIdToUuid(values.roomId),
-                // }),
-                token: 'aaa',
+                token: await trpcVanilla.rooms.getHostJwt.query({
+                    roomId: humanIdToUuid(values.roomId),
+                }),
             });
         } else {
             sessionStorage.setItem('name', values.name);
@@ -141,7 +139,14 @@ export const JoinRoomScreen = ({ roomId, withSignInButton, onReady }: TJoinRoomS
                         <Link to="/rooms">Sign in</Link>
                     </Button>
                 )}
-                {authState === 'logged-in' && <ProfileButton withName />}
+                {authState === 'logged-in' && (
+                    <div className="flex items-center gap-3">
+                        <Button size="sm" variant="secondary">
+                            <Link to="/rooms">Rooms</Link>
+                        </Button>
+                        <ProfileButton withName />
+                    </div>
+                )}
             </div>
             <div className="flex flex-col items-center gap-3">
                 <Logo isCentered className="mb-3" />

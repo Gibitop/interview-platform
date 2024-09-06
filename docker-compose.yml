@@ -1,10 +1,12 @@
 services:
     web:
-        build: './web'
+        build:
+            context: ./
+            dockerfile: ./web/Dockerfile
         restart: always
         ports: [0.0.0.0:3000:4173]
-    server:
-        build: './server'
+    backend:
+        build: './backend'
         restart: always
         ports: [0.0.0.0:3001:4444]
         depends_on:

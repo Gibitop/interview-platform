@@ -5,6 +5,7 @@ import { setup as usersSetup } from './controllers/users';
 import { setup as activeFileContentSetup } from './controllers/activeFileContent';
 import { setup as activeFilePathSetup } from './controllers/activeFilePath';
 import { setup as terminalSetup } from './controllers/terminal';
+import { setup as uploadSetup } from './controllers/upload';
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -28,6 +29,7 @@ server.ready().then(() => {
     activeFilePathSetup(server.io);
     activeFileContentSetup(server.io);
     terminalSetup(server.io);
+    uploadSetup(server.io);
 });
 
 server.listen({ port: 5001 }, () => console.log('Server is running on port 5001'));

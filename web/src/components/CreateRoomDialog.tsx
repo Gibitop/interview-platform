@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Button } from './ui/button';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { ROOM_TYPES } from '../../../backend/src/common/roomTypes';
+import type { ROOM_TYPES as roomTypesArray } from '~backend/common/roomTypes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
@@ -21,6 +21,8 @@ import { toast } from 'sonner';
 export type TCreateRoomDialogProps = {
     children: React.ReactNode;
 };
+
+const ROOM_TYPES: typeof roomTypesArray = ['node'];
 
 const formSchema = z.object({
     name: z.string().min(1),

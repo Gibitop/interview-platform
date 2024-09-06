@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import omit from 'lodash/omit';
-import type { TResponsePagination } from '../../../backend/src/common/pagination';
+import type { TResponsePagination } from '~backend/common/pagination';
 
 const defaultResponsePagination: TResponsePagination = {
     page: 1,

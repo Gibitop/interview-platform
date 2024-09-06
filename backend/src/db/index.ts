@@ -4,4 +4,4 @@ import { env } from '../common/env';
 
 const pgClient = pg(env.DATABASE_URL);
 
-export const db = drizzle(pgClient, { logger: true });
+export const db = drizzle(pgClient, { logger: false });

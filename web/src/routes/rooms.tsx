@@ -9,7 +9,7 @@ import { SimplePagination } from '~/components/simple/SimplePagination';
 import { Button } from '~/components/ui/button';
 import { usePagination } from '~/hooks/usePagination';
 import { trpc } from '~/lib/trpc';
-import { AppRouter } from '../../../backend/src/trpc/router';
+import type { AppRouter } from '~backend/trpc/router';
 import { DataTable } from '~/components/ui/data-table';
 import { SimpleTooltip } from '~/components/simple/SimpleTooltip';
 import { Badge } from '~/components/ui/badge';

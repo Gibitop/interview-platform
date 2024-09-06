@@ -4,13 +4,18 @@ export type C2SEvent =
     | 'input-to-terminal'
     | 'request-active-file-content'
     | 'patch-active-file-content'
+    | 'request-active-file-path'
+    | 'request-available-files'
+    | 'change-active-file-path'
+    | 'uploadFile'
     ;
 
 export type S2CEvent =
     | 'users-changed'
     | 'candidate-copied'
     | 'terminal-outputted'
-    | 'active-file-path-changed'
     | 'active-file-content-rewritten'
     | 'active-file-content-patched'
+    | 'active-file-path-changed'
+    | 'available-files-changed'
     ;

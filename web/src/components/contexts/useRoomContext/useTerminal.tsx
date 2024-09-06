@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
-import type { C2SEvent, S2CEvent } from '~/../../../insider/src/eventNames';
+import type { C2SEvent, S2CEvent } from '~insider/eventNames';
 import { useRoomStore } from '~/stores/room';
 
 export const useTerminal = (socket: Socket | null) => {

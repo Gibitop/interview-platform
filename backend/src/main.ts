@@ -21,7 +21,7 @@ server.register(fastifyTRPCPlugin, {
         createContext,
         onError({ path, error }) {
             // report to error monitoring
-            console.error(`Error in tRPC handler on path '${path}':`, error);
+            // console.error(`Error in tRPC handler on path '${path}':`, error);
         },
     } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
 });

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
 import type { C2SEvent, S2CEvent } from '~/../../insider/src/eventNames';
-import type { MyUserChangeRequest, User } from '~/../../insider/src/controllers/users';
+import type { ChangeMyUserRequest, User } from '~/../../insider/src/controllers/users';
 import { AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -14,7 +14,7 @@ export const useRoomUsers = (
     const [users, setUsers] = useState<User[]>([]);
 
     const changeMyUser = useCallback(
-        (data: MyUserChangeRequest) => {
+        (data: ChangeMyUserRequest) => {
             if (!socket || !socket.connected) return;
             socket.emit('change-my-user' satisfies C2SEvent, data);
 
@@ -47,8 +47,9 @@ export const useRoomUsers = (
                 if (role !== 'candidate') {
                     for (const user of prevUsers) {
                         if (user.role !== 'candidate') continue;
-                        const newAwarenessUser = newUsers.find(({ id }) => id === user.id);
-                        if (newAwarenessUser && !newAwarenessUser.isFocused && user.isFocused) {
+
+                        const newUser = newUsers.find(({ id }) => id === user.id);
+                        if (newUser && !newUser.isFocused && user.isFocused) {
                             toast(
                                 <span className="flex gap-2 items-center">
                                     <AlertTriangle size={16} />

@@ -2,6 +2,8 @@ import type { Server, Socket } from 'socket.io';
 import { z } from 'zod';
 import { implement } from '../utils/implementWithZod';
 import type { C2SEvent, S2CEvent } from '../eventNames';
+import jwt from 'jsonwebtoken';
+import { readFile } from 'fs/promises';
 
 export type Role = 'host' | 'candidate' | 'spectator';
 export type User = {
@@ -9,8 +11,12 @@ export type User = {
     role: Role;
     name: string;
     color: string;
-    line: number;
-    char: number;
+    selection: {
+        startLine: number;
+        startChar: number;
+        endLine: number;
+        endChar: number;
+    };
     isFocused: boolean;
 };
 
@@ -58,30 +64,55 @@ const broadcastUsers = (io: Server) => {
     broadcastToRoles(io, 'users-changed' satisfies S2CEvent, userForCandidates, ['candidate']);
 };
 
-const zMyUserChange = implement<
-    Partial<Pick<User, 'name' | 'line' | 'char' | 'isFocused'>>
+const zChangeMyUserRequest = implement<
+    Partial<Pick<User, 'name' | 'selection' | 'isFocused'>>
 >().with({
     name: z.string().optional(),
-    char: z.number().optional(),
-    line: z.number().optional(),
+    selection: implement<Exclude<User['selection'], null>>().with({
+        startLine: z.number(),
+        startChar: z.number(),
+        endLine: z.number(),
+        endChar: z.number(),
+    }).optional(),
     isFocused: z.boolean().optional(),
 });
-export type MyUserChangeRequest = z.infer<typeof zMyUserChange>;
+export type ChangeMyUserRequest = z.infer<typeof zChangeMyUserRequest>;
+
+
+const validateHostJwt = async (token: string): Promise<boolean> => {
+    try {
+        const parsed: (jwt.JwtPayload & { roomId?: string }) | string = jwt.verify(
+            token,
+            await readFile('./jwt-public-key.pem', 'utf-8'),
+            { algorithms: ['RS256'] }
+        );
+        if (typeof parsed !== 'object') return false;
+
+        // Maybe add roomId validation
+
+        return true
+    } catch(e) {
+        return false;
+    }
+}
 
 export const setup = (io: Server) => {
-    const connectionListener = (socket: Socket) => {
+    const connectionListener = async (socket: Socket) => {
         const user: User = {
-            char: 1,
-            line: 1,
             id: socket.id,
             isFocused: false,
             name: '',
             role: 'candidate',
+            selection: {
+                startLine: 1,
+                startChar: 1,
+                endLine: 1,
+                endChar: 1,
+            },
             color: selectColor(),
         };
 
-        // TODO: Check JWT
-        if (socket.handshake.auth.token === 'aaa') {
+        if (await validateHostJwt(socket.handshake.auth.token)) {
             hostIds.add(socket.id);
             if (socket.handshake.auth.spectatorMode) {
                 user.role = 'spectator';
@@ -92,15 +123,8 @@ export const setup = (io: Server) => {
 
         users.set(socket.id, user);
 
-        socket.once('disconnect', () => {
-            hostIds.delete(socket.id);
-            returnColor(user.color);
-            users.delete(socket.id);
-            broadcastUsers(io);
-        });
-
-        socket.on('change-my-user' satisfies C2SEvent, (data: unknown) => {
-            const parsed = zMyUserChange.safeParse(data);
+        const changeMuUserListener = (data: unknown) => {
+            const parsed = zChangeMyUserRequest.safeParse(data);
             if (!parsed.success) {
                 return;
             }
@@ -109,6 +133,15 @@ export const setup = (io: Server) => {
                 ...users.get(socket.id)!,
                 ...parsed.data,
             });
+            broadcastUsers(io);
+        };
+        socket.on('change-my-user' satisfies C2SEvent, changeMuUserListener);
+
+        socket.once('disconnect', () => {
+            socket.off('change-my-user' satisfies C2SEvent, changeMuUserListener);
+            hostIds.delete(socket.id);
+            returnColor(user.color);
+            users.delete(socket.id);
             broadcastUsers(io);
         });
     };

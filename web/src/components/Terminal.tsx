@@ -1,15 +1,15 @@
 import { useXterm } from '~/hooks/useXterm';
 import { useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import '@xterm/xterm/css/xterm.css';
 import { useRoomContext } from './contexts/useRoomContext';
+import { useRoomStore } from '~/stores/room';
+import '@xterm/xterm/css/xterm.css';
 
 export const Terminal = () => {
     const { elRef, terminalRef } = useXterm();
 
-    const isHost = false;
-
     const roomContext = useRoomContext();
+    const isHost = useRoomStore(data => data?.role === 'host');
 
     useEffect(() => {
         if (!roomContext || !terminalRef.current) return;
@@ -31,15 +31,10 @@ export const Terminal = () => {
 
     const uploadInputRef = useRef<HTMLInputElement>(null);
 
-    const handleUpload = async () => {
+    const handleUpload = () => {
         if (!uploadInputRef.current?.files?.length) return;
         for (const file of uploadInputRef.current.files) {
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const data = new Uint8Array(reader.result as ArrayBuffer);
-                // TODO: upload
-            };
-            reader.readAsArrayBuffer(file);
+            roomContext?.uploadFile(file);
         }
         uploadInputRef.current.files = null;
     };
@@ -68,7 +63,7 @@ export const Terminal = () => {
                 </div>
             </div>
             <div className="h-full">
-                {/* 740px = 80 cols */}
+                {/* 740px = 80 terminal columns (chars) */}
                 <div className="h-full w-[740px]" ref={elRef} />
             </div>
         </>

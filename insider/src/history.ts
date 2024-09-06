@@ -1,4 +1,4 @@
-import { Patch, type ITimestampStruct } from 'json-joy/lib/json-crdt';
+import { Patch, type ITimestampStruct } from 'json-joy/lib/json-crdt/index.js';
 
 function binarySearch<T>(arr: T[], compare: (a: T) => number) {
     let start = 0;

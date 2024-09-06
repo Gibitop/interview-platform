@@ -5,10 +5,13 @@
         "parser": {
             "syntax": "typescript"
         },
-        "transform": {},
         "target": "es2022",
         "loose": false,
         "externalHelpers": false
+    },
+    "module": {
+        "type": "es6",
+        "resolveFully": true
     },
     "sourceMaps": true,
     "minify": false

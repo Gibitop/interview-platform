@@ -18,6 +18,8 @@ import { shikiToMonaco } from '@shikijs/monaco';
 
 import reactDtsUrl from '~public/react.d.ts.txt?url';
 import { useRoomStore } from '~/stores/room';
+import { FilePicker } from './FilePicker';
+import debounce from 'lodash/debounce';
 
 // Don't use CDN
 self.MonacoEnvironment = {
@@ -40,12 +42,10 @@ self.MonacoEnvironment = {
 loader.config({ monaco });
 
 // Create the highlighter, it can be reused
-const highlighter = await getHighlighter({
+getHighlighter({
     themes: ['dark-plus'],
-    langs: ['javascript', 'typescript'],
-});
-
-shikiToMonaco(highlighter, monaco);
+    langs: ['javascript', 'typescript', 'jsx', 'tsx', 'json'],
+}).then(highlighter => shikiToMonaco(highlighter, monaco));
 
 const format = async (text: string) =>
     prettier.format(text, {
@@ -87,11 +87,11 @@ const monacoPrettier: monaco.languages.DocumentRangeFormattingEditProvider &
 };
 
 monaco.languages.registerDocumentRangeFormattingEditProvider(
-    ['typescript', 'javascript', 'json'],
+    ['typescript', 'javascript', 'jsx', 'tsx', 'json'],
     monacoPrettier,
 );
 monaco.languages.registerDocumentFormattingEditProvider(
-    ['typescript', 'javascript', 'json'],
+    ['typescript', 'javascript', 'jsx', 'tsx', 'json'],
     monacoPrettier,
 );
 
@@ -106,12 +106,18 @@ export const Editor = () => {
     useEffect(() => {
         if (!changeMyUser || !monacoEditor) return;
 
-        monacoEditor.onDidChangeCursorPosition(e => {
+        const debouncedSendCursor = debounce((e: editor.ICursorSelectionChangedEvent) => {
             changeMyUser({
-                line: e.position.lineNumber,
-                char: e.position.column,
+                selection: {
+                    startLine: e.selection.startLineNumber,
+                    startChar: e.selection.startColumn,
+                    endLine: e.selection.endLineNumber,
+                    endChar: e.selection.endColumn,
+                },
             });
-        });
+        }, 20);
+
+        monacoEditor.onDidChangeCursorSelection(debouncedSendCursor);
     }, [changeMyUser, monacoEditor]);
 
     // Draw user cursors
@@ -119,7 +125,7 @@ export const Editor = () => {
         if (!roomContext?.users || !monacoEditor) return;
 
         const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-        for (const { id, line, char } of roomContext.users) {
+        for (const { id, selection } of roomContext.users) {
             if (id === roomContext.myId) continue;
 
             decorations.push({
@@ -128,7 +134,12 @@ export const Editor = () => {
                     className: 'yRemoteSelection yRemoteSelection-' + id,
                     beforeContentClassName: 'yRemoteSelectionHead yRemoteSelectionHead-' + id,
                 },
-                range: new monaco.Range(line, char, line, char),
+                range: new monaco.Range(
+                    selection.startLine,
+                    selection.startChar,
+                    selection.endLine,
+                    selection.endChar,
+                ),
             });
         }
 
@@ -158,7 +169,7 @@ export const Editor = () => {
             target: monaco.languages.typescript.ScriptTarget.Latest,
             allowNonTsExtensions: true,
             moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-            module: monaco.languages.typescript.ModuleKind.CommonJS,
+            module: monaco.languages.typescript.ModuleKind.ESNext,
             noEmit: true,
             esModuleInterop: true,
             jsx: monaco.languages.typescript.JsxEmit.React,
@@ -195,8 +206,10 @@ export const Editor = () => {
         editor.setModel(codeModel);
     };
 
+    // Send active file content changes to the server
     useEffect(() => {
         if (!monacoEditor || !roomContext) return;
+
         monacoEditor.onDidChangeModelContent(event => {
             if (roomContext.getActiveFileContent() === monacoEditor.getModel()?.getValue()) return;
 
@@ -215,6 +228,7 @@ export const Editor = () => {
         });
     }, [monacoEditor, roomContext]);
 
+    // Read-only mode for spectators
     useEffect(() => {
         if (!monacoEditor) return;
         monacoEditor.updateOptions({
@@ -223,7 +237,7 @@ export const Editor = () => {
         });
     }, [isSpectator, monacoEditor]);
 
-    // Add user cursors
+    // Other users cursors style
     const styleSheet = useMemo(() => {
         let cursorStyles = '';
 
@@ -242,10 +256,23 @@ export const Editor = () => {
         return { __html: cursorStyles };
     }, [roomContext?.users]);
 
+    // Hack to keep the cursor position from jumping to the end of the file when other users edit the file
+    useEffect(() => {
+        const newContent = roomContext?.activeFileContent ?? '';
+        if (newContent === monacoEditor?.getValue()) return;
+
+        const selection = monacoEditor?.getSelection();
+        if (!selection) return;
+
+        monacoEditor?.setValue(newContent);
+        monacoEditor?.setSelection(selection);
+    }, [monacoEditor, roomContext?.activeFileContent]);
+
     return (
         <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
             <div className="px-3 py-2 flex justify-between">
+                <FilePicker />
                 <div className="flex gap-2">
                     <Button
                         size="xs"
@@ -260,7 +287,6 @@ export const Editor = () => {
             </div>
             <div className="flex-1" onContextMenu={e => e.preventDefault()}>
                 <MonacoEditor
-                    value={roomContext?.getActiveFileContent() || ''}
                     theme="dark-plus"
                     onMount={handleMonacoMount}
                     options={{ fontSize: 14, minimap: { enabled: false } }}

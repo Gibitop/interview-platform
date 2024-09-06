@@ -4,7 +4,10 @@ WORKDIR /insider
 
 COPY . .
 
-RUN yarn install
-RUN yarn build
+# Required for node-pty
+RUN apk add make python3 g++
 
-CMD yarn start
+RUN npm i
+RUN npm run build
+
+CMD npm run start

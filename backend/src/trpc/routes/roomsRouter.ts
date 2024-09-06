@@ -15,7 +15,7 @@ import { ROOM_TYPES } from '../../common/roomTypes';
 import { createContainer, deleteContainer } from '../../common/dockerode';
 import jwt from 'jsonwebtoken';
 import { readFile } from 'fs/promises';
-import pick from 'lodash/pick';
+import pick from 'lodash/pick.js';
 
 const START_PORT = 4000;
 

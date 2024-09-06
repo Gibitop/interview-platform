@@ -2,8 +2,8 @@ import { AlertTriangle } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
-import type { User } from '~/../../../insider/src/controllers/users';
-import type { C2SEvent, S2CEvent } from '~/../../../insider/src/eventNames';
+import type { User } from '~insider/controllers/users';
+import type { C2SEvent, S2CEvent } from '~insider/eventNames';
 
 export const useCandidateCopy = (
     socket: Socket | null,
