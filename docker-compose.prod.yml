@@ -44,7 +44,7 @@ services:
         build:
             context: ./backend
             dockerfile: ./migration.Dockerfile
-        restart: no
+        restart: "no"
         depends_on:
             db:
                 condition: service_healthy
