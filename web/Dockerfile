@@ -1,4 +1,4 @@
-FROM node:20-alpine as build
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -6,9 +6,19 @@ COPY web web
 COPY backend backend
 COPY insider insider
 
-WORKDIR /app/web
+# TODO: Make it so we don't need to install other projects' dependencies
 
+WORKDIR /app/backend
 RUN npm install
+
+WORKDIR /app/insider
+# Required for node-pty
+RUN apk add make python3 g++
+RUN npm install
+
+WORKDIR /app/web
+RUN npm install
+
 RUN npm run build
 
 FROM caddy:2.8.4-alpine as final
