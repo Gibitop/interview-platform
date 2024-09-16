@@ -7,17 +7,17 @@ Generate JWT keys
 
 Build all room images
 ```bash
-DOMAIN='localhost' docker compose -f ./docker-compose.insiders.yml build
+DOMAIN='localhost' docker-compose -f ./docker-compose.insiders.yml build
 ```
 
 Build and start the application with http on localhost
 ```bash
-DOMAIN='localhost' docker compose up
+DOMAIN='localhost' docker-compose up
 ```
 
 Build and start the application with https in prod
 ```bash
-DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker compose up
+DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker-compose -f ./docker-compose.prod.yml up
 ```
 
 
