@@ -48,11 +48,7 @@ export const JoinRoomScreen = ({ roomId, withSignInButton, onReady }: TJoinRoomS
     const { mutateAsync: joinRoomAsync, isPending: isLoading } = useJoinRoom();
 
     const roomIdExistsRefinement = useRefinement<z.infer<typeof formSchema>>(
-        ({ roomId }) =>
-            trpcVanilla.rooms.getPublicInfo
-                .query({ roomId: humanIdToUuid(roomId) })
-                .then(() => true)
-                .catch(() => false),
+        ({ roomId }) => trpcVanilla.rooms.roomExists.query({ roomId: humanIdToUuid(roomId) }),
         { debounce: 300 },
     );
     const form = useForm<z.infer<typeof formSchema>>({

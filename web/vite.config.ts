@@ -17,9 +17,14 @@ export default defineConfig({
             '/api': {
                 target: 'http://localhost:3000',
             },
-            '/ws': {
+            '^/insider/.*?/ws': {
                 ws: true,
-                target: 'ws://localhost:3000',
+                rewrite: path => {
+                    const out = path.replace(/^\/insider\/.*?\/ws+/, '')
+                    console.log({ out });
+                    return out;
+                },
+                target: 'ws://localhost:5050',
             },
             '/public': {
                 target: 'http://localhost:5173',

@@ -6,8 +6,8 @@
     "scripts": {
         "dev": "tsx --watch src/main.ts",
         "check-types": "tsc --noEmit",
-        "build": "rm -rf ./dist/* && swc ./src/* -d ./dist --config-file .swcrc && fix-esm-import-path ./dist",
-        "start": "node dist/src/main.js",
+        "build": "rm -rf ./dist/* && swc ./src/* -d ./dist --config-file .swcrc --strip-leading-paths && fix-esm-import-path ./dist",
+        "start": "node dist/main.js",
         "drizzle-push": "drizzle-kit push",
         "drizzle-generate": "drizzle-kit generate",
         "drizzle-migrate": "tsx tools/migrate.ts",

@@ -11,7 +11,7 @@ type OnDataHandler = (data: string) => void;
 const onDataHandlers: Set<OnDataHandler> = new Set();
 
 const createShell = () => {
-    shell = pty.spawn('bash', [], { cwd: workDir, cols: 80 });
+    shell = pty.spawn('sh', [], { cwd: workDir, cols: 80 });
     shell.onData(data => {
         if (data.endsWith('\n')) {
             lastData = data;

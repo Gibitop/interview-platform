@@ -1,9 +1,17 @@
-FROM node:20-alpine
+FROM node:20-alpine as build
 
 WORKDIR /app
 
-COPY . .
+COPY web web
+COPY backend backend
+COPY insider insider
+
+WORKDIR /app/web
+
 RUN npm install
 RUN npm run build
 
-CMD npm run preview -- --host 0.0.0.0
+FROM caddy:2.8.4-alpine as final
+
+COPY --from=0 /app/web/dist /srv
+COPY web/Caddyfile /etc/caddy/Caddyfile

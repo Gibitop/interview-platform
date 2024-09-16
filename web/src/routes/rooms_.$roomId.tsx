@@ -9,7 +9,7 @@ import { Logo } from '~/components/Logo';
 import { ProfileButton } from '~/components/ProfileButton';
 import { trpc } from '~/lib/trpc';
 import { JoinRoomScreen } from '~/components/JoinRoomScreen';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { humanIdToUuid } from '~/utils/uuid';
 import { useRoomStore } from '~/stores/room';
 import { Button } from '~/components/ui/button';
@@ -30,9 +30,6 @@ const Room = () => {
         roomStore?.role === 'candidate' ? roomStore.name : selfUser?.name,
     );
 
-    const { data: roomPublicInfo, isLoading: isRoomLoading } = trpc.rooms.getPublicInfo.useQuery({
-        roomId: roomUuid,
-    });
     const { data: roomHostInfo } = trpc.rooms.getHostInfo.useQuery({ roomId: roomUuid });
 
     if (!roomStore || !name) {
@@ -49,20 +46,8 @@ const Room = () => {
         );
     }
 
-    if (isRoomLoading) {
-        return (
-            <main className="h-screen grid place-items-center">
-                <Loader2 className="animate-spin" />
-            </main>
-        );
-    }
-
-    if (!roomPublicInfo) {
-        return <main className="h-screen grid place-items-center">Could not load the room</main>;
-    }
-
     return (
-        <RoomProvider wsPort={roomPublicInfo.wsPort}>
+        <RoomProvider>
             <main className="h-screen flex flex-col">
                 <div className="flex justify-between border-b dark:border-neutral-800 px-3 py-2">
                     {roomStore.role === 'host' && roomHostInfo ? (

@@ -7,6 +7,8 @@ services:
         labels:
             - traefik.enable=true
             - traefik.http.routers.web.rule=Host(`$DOMAIN`)
+            - traefik.http.routers.guestbook.entrypoints=websecure
+            - traefik.http.routers.guestbook.tls.certresolver=myresolver
         depends_on:
             - traefik
             - backend
@@ -26,10 +28,13 @@ services:
             - env/backend.env
         environment:
             DOMAIN: $DOMAIN
+            INSIDER_LABELS: "traefik.http.routers.guestbook.entrypoints=websecure::traefik.http.routers.guestbook.tls.certresolver=myresolver"
         labels:
             - traefik.enable=true
             - traefik.http.routers.backend.rule=(Host(`$DOMAIN`) && PathPrefix(`/api`))
             - traefik.http.services.backend.loadbalancer.server.port=3000
+            - traefik.http.routers.guestbook.entrypoints=websecure
+            - traefik.http.routers.guestbook.tls.certresolver=myresolver
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
         networks:
@@ -66,17 +71,22 @@ services:
     traefik:
         image: traefik:v3.1.2
         command:
-            - --api.dashboard=true
-            - --api.insecure=true
+            - --api.dashboard=false
+            - --api.insecure=fasle
 
-            - --accesslog=true
-            - --log.level=INFO
+            - "--entryPoints.websecure.address=:443"
+            - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+            - "--certificatesresolvers.myresolver.acme.email=$LET_ENCRYPT_EMAIL"
+            - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+            - "--entrypoints.web.address=:80"
+            - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+            - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+            - --accesslog=false
 
             - --providers.docker
             - --providers.docker.exposedbydefault=false
             - --providers.docker.network=interview-platform-traefik
-
-            - --entrypoints.web.address=:80
         ports:
             - '3000:80'
             - '3001:8080'
@@ -87,6 +97,7 @@ services:
 
 volumes:
     pgdata:
+    letsencrypt:
 
 networks:
     interview-platform-traefik:

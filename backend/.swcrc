@@ -7,8 +7,7 @@
         },
         "transform": {},
         "target": "es2022",
-        "loose": false,
-        "externalHelpers": false
+        "loose": false
     },
     "sourceMaps": true,
     "minify": false

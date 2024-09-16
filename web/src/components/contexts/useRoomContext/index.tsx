@@ -13,7 +13,6 @@ import { useActiveFilePath } from './useActiveFilePath';
 import { useUploadFile } from './useUploadFile';
 
 export type TRoomContextProviderProps = {
-    wsPort: number;
     children: React.ReactNode;
 };
 
@@ -36,7 +35,7 @@ type TRoomContext = {
 
 const roomContext = createContext<TRoomContext | null>(null);
 
-export const RoomProvider = ({ wsPort, children }: TRoomContextProviderProps) => {
+export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
     const roomStore = useRoomStore(data => data);
     const { data: selfUser } = trpc.auth.getSelf.useQuery();
 
@@ -46,7 +45,8 @@ export const RoomProvider = ({ wsPort, children }: TRoomContextProviderProps) =>
         if (!roomStore) return;
         if (roomStore.role !== 'candidate' && !selfUser) return;
 
-        const sock = io(`ws://${location.hostname}:${wsPort}`, {
+        const sock = io(`ws://${location.host}`, {
+            path: `/insider/${roomStore.roomId}/ws/socket.io`,
             transports: ['websocket'],
             auth: {
                 token: roomStore.role === 'host' ? roomStore.token : undefined,
@@ -62,7 +62,7 @@ export const RoomProvider = ({ wsPort, children }: TRoomContextProviderProps) =>
             sock.disconnect();
             setSocket(null);
         };
-    }, [roomStore, selfUser, wsPort]);
+    }, [roomStore, selfUser]);
 
     const { changeMyUser, users } = useRoomUsers(
         socket,

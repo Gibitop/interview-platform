@@ -8,8 +8,9 @@
 + Clear listeners
 + Validate event arguments
 + Check JWT
-- Containerisation
++ Containerisation
 - Insider security
+- Bug: Sometimes, there is no user's name on first join
 
 # v2.0.1
 - Usage docs

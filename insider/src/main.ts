@@ -32,4 +32,13 @@ server.ready().then(() => {
     uploadSetup(server.io);
 });
 
-server.listen({ port: 5001 }, () => console.log('Server is running on port 5001'));
+server.listen(
+    { port: 5050, host: '0.0.0.0' },
+    (err) => {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+        console.log('Server is running on port 5050')
+    },
+);
