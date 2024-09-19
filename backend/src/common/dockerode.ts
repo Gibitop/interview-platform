@@ -27,7 +27,10 @@ export const createContainer = async (
     if (env.INSIDER_ADDITIONAL_LABELS) {
         env.INSIDER_ADDITIONAL_LABELS
             .split('\n')
-            .map((label) => label.trim())
+            .map(label => label
+                .trim()
+                .replaceAll('<SERVICE_NAME>', name)
+            )
             .filter(Boolean)
             .forEach((label) => {
                 const [key, value] = label.split('=');
@@ -44,7 +47,7 @@ export const createContainer = async (
         HostConfig: {
             NetworkMode: "interview-platform-traefik",
             // AutoRemove: true,
-            Binds: [`${env.INSIDER_JWT_PUBLIC_KEY_PATH}:/app/jwt-public-key.pem`],
+            Binds: [`${env.INSIDER_JWT_PUBLIC_KEY_PATH}:/app/jwt-public-key.pem:ro`],
         },
         Env: [`NODE_ENV=${env.NODE_ENV}`],
         Labels: {
@@ -62,7 +65,7 @@ export const createContainer = async (
 };
 
 export const deleteContainer = async (roomId: string) => {
-    await docker.getContainer(makeContainerName(roomId)).stop().catch(() => {});
+    await docker.getContainer(makeContainerName(roomId)).stop().catch(() => { });
 };
 
-export const getContainers = async () => {};
+export const getContainers = async () => { };

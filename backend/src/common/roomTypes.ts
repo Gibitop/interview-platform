@@ -6,6 +6,6 @@ export const ROOM_TYPES = [
 export type TRoomType = typeof ROOM_TYPES[number];
 
 export const IMAGES: Record<TRoomType, string> = {
-    node: 'insider-node',
+    node: 'ghcr.io/gibitop/interview-platform-insider-node',
     // java: 'insider-java',
 } as const;

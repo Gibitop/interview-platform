@@ -47,7 +47,7 @@ services:
         build:
             context: ./backend
             dockerfile: ./migration.Dockerfile
-        restart: no
+        restart: "no"
         environment:
             DATABASE_URL: $DATABASE_URL
         depends_on:

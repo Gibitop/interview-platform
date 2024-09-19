@@ -24,6 +24,12 @@ services:
                 condition: service_started
         environment:
             DOMAIN: $DOMAIN
+            NODE_ENV: $NODE_ENV
+            DATABASE_URL: $DATABASE_URL
+            DOCKER_SOCKET_PATH: $DOCKER_SOCKET_PATH
+            HASHING_SECRET_HEX: $HASHING_SECRET_HEX
+            REGISTRATION_OPEN: $REGISTRATION_OPEN
+            INSIDER_JWT_PUBLIC_KEY_PATH: $INSIDER_JWT_PUBLIC_KEY_PATH
             ADDITIONAL_INSIDER_LABELS: |
                 traefik.http.routers.<SERVICE_NAME>.entrypoints=websecure
                 traefik.http.routers.<SERVICE_NAME>.tls.certresolver=myresolver
@@ -34,13 +40,16 @@ services:
             - traefik.http.routers.backend.entrypoints=websecure
             - traefik.http.routers.backend.tls.certresolver=myresolver
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
+            - $DOCKER_SOCKET_PATH:/var/run/docker.sock
+            - ./keys/jwt-private-key.pem:/app/jwt-private-key.pem:ro
         networks:
             - db
             - interview-platform-traefik
     migration:
         image: ghcr.io/gibitop/interview-platform-migration:latest
         restart: "no"
+        environment:
+            DATABASE_URL: $DATABASE_URL
         depends_on:
             db:
                 condition: service_healthy
@@ -49,7 +58,7 @@ services:
     db:
         image: postgres:16.4-alpine3.20
         restart: always
-        user: 'postgres'
+        user: postgres
         environment:
             POSTGRES_PASSWORD: 'password'
             POSTGRES_DB: 'interview-platform'
@@ -83,7 +92,6 @@ services:
             - --providers.docker.network=interview-platform-traefik
         ports:
             - '3000:80'
-            - '3001:8080'
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
         networks:
