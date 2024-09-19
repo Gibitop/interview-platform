@@ -36,6 +36,7 @@ export const useCandidateCopy = (
     }, [socket, users]);
 
     const reportCopy = useCallback(() => {
+        console.log({ socket, myRole });
         if (!socket || !socket.connected) return;
         if (myRole !== 'candidate') return;
         socket.emit('copy' satisfies C2SEvent);

@@ -1,7 +1,20 @@
 import pg from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import { env } from '../src/common/env';
+import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
+import { config } from 'dotenv';
+
+config();
+
+const env = createEnv({
+    server: {
+        DATABASE_URL: z.string().url(),
+    },
+    runtimeEnv: process.env,
+    emptyStringAsUndefined: true,
+});
+
 
 (async () => {
     const sql = pg(env.DATABASE_URL, { max: 1 });

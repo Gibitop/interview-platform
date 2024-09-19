@@ -2,11 +2,6 @@ import Docker from 'dockerode';
 import { type TRoomType, IMAGES } from './roomTypes';
 import { env } from './env';
 
-const INSIDER_CONTROL_PORT = 4040;
-const WS_PORT = 5050;
-const FREE_TCP_PORT = 8080;
-
-
 const docker = new Docker({ socketPath: env.DOCKER_SOCKET_PATH });
 export const ping = () => docker.ping();
 
@@ -29,12 +24,17 @@ export const createContainer = async (
     const traefikWsPrefix = `${traefikPrefix}/ws`;
 
     const additionalLabels: Record<string, string> = {};
-    if (process.env.INSIDER_LABELS) {
-        process.env.INSIDER_LABELS.split('::').forEach((label) => {
-            const [key, value] = label.split('=');
-            if (!key || !value) return;
-            additionalLabels[key] = value;
-        });
+    if (env.INSIDER_ADDITIONAL_LABELS) {
+        env.INSIDER_ADDITIONAL_LABELS
+            .split('\n')
+            .map((label) => label.trim())
+            .filter(Boolean)
+            .forEach((label) => {
+                const [key, value] = label.split('=');
+                if (key && value) {
+                    additionalLabels[key] = value;
+                }
+            });
     }
 
     const container = await docker.createContainer({
@@ -42,28 +42,27 @@ export const createContainer = async (
         name,
         Tty: true,
         HostConfig: {
-            NetworkMode: "interview-platform-traefik"
+            NetworkMode: "interview-platform-traefik",
+            // AutoRemove: true,
+            Binds: [`${env.INSIDER_JWT_PUBLIC_KEY_PATH}:/app/jwt-public-key.pem`],
         },
+        Env: [`NODE_ENV=${env.NODE_ENV}`],
         Labels: {
             ...additionalLabels,
 
-            // TODO: Env validation
             'traefik.enable': 'true',
-            [`traefik.http.routers.${name}.rule`]: `(Host(\`${process.env.DOMAIN}\`) && PathPrefix(\`${traefikWsPrefix}\`))`,
-            [`traefik.http.services.${name}.loadbalancer.server.port`]: `${WS_PORT}`,
+            [`traefik.http.routers.${name}.rule`]: `(Host(\`${env.DOMAIN}\`) && PathPrefix(\`${traefikWsPrefix}\`))`,
+            [`traefik.http.services.${name}.loadbalancer.server.port`]: `${env.INSIDER_WS_PORT}`,
             [`traefik.http.routers.${name}.middlewares`]: `${name}-stripprefix`,
             [`traefik.http.middlewares.${name}-stripprefix.stripprefix.prefixes`]: `${traefikWsPrefix}`,
         }
     });
 
     await container.start();
-    container.wait({ condition: 'not-running' }).then(() => {
-        container.remove().catch(() => { });
-    });
 };
 
 export const deleteContainer = async (roomId: string) => {
-    await docker.getContainer(makeContainerName(roomId)).stop();
+    await docker.getContainer(makeContainerName(roomId)).stop().catch(() => {});
 };
 
-export const getContainers = async () => { };
+export const getContainers = async () => {};

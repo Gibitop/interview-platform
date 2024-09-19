@@ -34,3 +34,5 @@ dist-ssr
 
 # JWT public key
 jwt-public-key.pem
+
+wd/

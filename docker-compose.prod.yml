@@ -1,21 +1,19 @@
 services:
     web:
-        build:
-            context: ./
-            dockerfile: ./web/Dockerfile
+        image: ghcr.io/gibitop/interview-platform-web:latest
         restart: always
         labels:
             - traefik.enable=true
             - traefik.http.routers.web.rule=Host(`$DOMAIN`)
-            - traefik.http.routers.guestbook.entrypoints=websecure
-            - traefik.http.routers.guestbook.tls.certresolver=myresolver
+            - traefik.http.routers.web.entrypoints=websecure
+            - traefik.http.routers.web.tls.certresolver=myresolver
         depends_on:
             - traefik
             - backend
         networks:
             - interview-platform-traefik
     backend:
-        build: './backend'
+        image: ghcr.io/gibitop/interview-platform-backend:latest
         restart: always
         depends_on:
             db:
@@ -24,36 +22,32 @@ services:
                 condition: service_completed_successfully
             traefik:
                 condition: service_started
-        env_file:
-            - env/backend.env
         environment:
             DOMAIN: $DOMAIN
-            INSIDER_LABELS: "traefik.http.routers.guestbook.entrypoints=websecure::traefik.http.routers.guestbook.tls.certresolver=myresolver"
+            ADDITIONAL_INSIDER_LABELS: |
+                traefik.http.routers.<SERVICE_NAME>.entrypoints=websecure
+                traefik.http.routers.<SERVICE_NAME>.tls.certresolver=myresolver
         labels:
             - traefik.enable=true
             - traefik.http.routers.backend.rule=(Host(`$DOMAIN`) && PathPrefix(`/api`))
             - traefik.http.services.backend.loadbalancer.server.port=3000
-            - traefik.http.routers.guestbook.entrypoints=websecure
-            - traefik.http.routers.guestbook.tls.certresolver=myresolver
+            - traefik.http.routers.backend.entrypoints=websecure
+            - traefik.http.routers.backend.tls.certresolver=myresolver
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
         networks:
             - db
             - interview-platform-traefik
     migration:
-        build:
-            context: ./backend
-            dockerfile: ./migration.Dockerfile
+        image: ghcr.io/gibitop/interview-platform-migration:latest
         restart: "no"
         depends_on:
             db:
                 condition: service_healthy
-        env_file:
-            - env/backend.env
         networks:
             - db
     db:
-        image: postgres
+        image: postgres:16.4-alpine3.20
         restart: always
         user: 'postgres'
         environment:

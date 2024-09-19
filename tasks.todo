@@ -9,15 +9,16 @@
 + Validate event arguments
 + Check JWT
 + Containerisation
-- Insider security
-- Bug: Sometimes, there is no user's name on first join
-- Stop rooms
-
-# v2.0.1
-- Usage docs
-- Bundle optimizations
++ Insider security (not being root + aceess only to working directory)
++ Bug: Reporting copy does not work
++ Usage docs
++ Stop rooms
+? Bug: Sometimes, there is no user's name on first join
+- HTTPS
 
 # v2.*
+- Loader for room stopping
+- Bundle optimizations
 - Offline recovery
 - .ipignore - ignore files from being available (eg: node_modules/*)
 - Other languages support

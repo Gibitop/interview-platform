@@ -1,4 +1,5 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { AlertDialogProvider } from '~/components/contexts/AlertDialog';
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { TrpcProvider } from '~/components/contexts/Trpc';
 import { Toaster } from '~/components/ui/sonner';
@@ -9,7 +10,9 @@ export const Route = createRootRoute({
         <TrpcProvider>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
                 <Toaster />
-                <Outlet />
+                <AlertDialogProvider>
+                    <Outlet />
+                </AlertDialogProvider>
                 {/* <TanStackRouterDevtools /> */}
             </ThemeProvider>
         </TrpcProvider>

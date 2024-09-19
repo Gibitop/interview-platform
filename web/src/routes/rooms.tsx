@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ColumnDef } from '@tanstack/react-table';
-import { DoorOpen, Link2, Plus } from 'lucide-react';
+import { DoorOpen, Link2, Loader2, Plus, StopCircle } from 'lucide-react';
 import { AuthScreen } from '~/components/AuthScreen';
 import { CreateRoomDialog } from '~/components/CreateRoomDialog';
 import { Logo } from '~/components/Logo';
@@ -15,8 +15,59 @@ import { SimpleTooltip } from '~/components/simple/SimpleTooltip';
 import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
 import { uuidToHumanId } from '~/utils/uuid';
+import { useAlertDialog } from '~/components/contexts/AlertDialog';
 
 const dateFormatter = new Intl.DateTimeFormat(['ru-RU']);
+
+const ActionsColumn = ({ roomId }: { roomId: string }) => {
+    const trpcUtils = trpc.useUtils();
+    const { mutate: stopRoom, isPending: isStoppingRoom } = trpc.rooms.stop.useMutation({
+        onSuccess: () => {
+            trpcUtils.rooms.getMy.invalidate();
+        },
+    });
+    const { confirm } = useAlertDialog();
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(`${window.location.origin}/rooms/${roomId}`);
+        toast.success('Room link copied!');
+    };
+
+    return (
+        <div className="space-x-2 text-end">
+            <SimpleTooltip tipContent="Join the room">
+                <Button size="xs" variant="outline" className="size-7 p-1" asChild>
+                    <Link to={`/rooms/${uuidToHumanId(roomId)}`}>
+                        <DoorOpen />
+                    </Link>
+                </Button>
+            </SimpleTooltip>
+            <SimpleTooltip tipContent="Copy link">
+                <Button size="xs" variant="outline" className="size-7 p-1" onClick={handleCopyLink}>
+                    <Link2 />
+                </Button>
+            </SimpleTooltip>
+            <SimpleTooltip tipContent="Stop room container">
+                <Button
+                    size="xs"
+                    variant="outline"
+                    className="size-7 p-1"
+                    disabled={isStoppingRoom}
+                    onClick={() =>
+                        confirm({
+                            onConfirm: () => stopRoom({ roomId }),
+                            title: 'Are you sure you want to stop this room?',
+                            body: "You won't be able to start it again and all the data will be lost.",
+                        })
+                    }
+                >
+                    {isStoppingRoom && <Loader2 className="animate-spin" />}
+                    {!isStoppingRoom && <StopCircle />}
+                </Button>
+            </SimpleTooltip>
+        </div>
+    );
+};
 
 const columns: ColumnDef<
     AppRouter['rooms']['getMy']['_def']['$types']['output']['rooms'][number]
@@ -44,34 +95,8 @@ const columns: ColumnDef<
     },
     {
         id: 'actions',
-        cell: ({ row }) => {
-            const handleCopyLink = () => {
-                navigator.clipboard.writeText(`${window.location.origin}/rooms/${row.original.id}`);
-                toast.success('Room link copied!');
-            };
-
-            return (
-                <div className="space-x-2 text-end">
-                    <SimpleTooltip tipContent="Join the room">
-                        <Button size="xs" variant="outline" className="size-7 p-1" asChild>
-                            <Link to={`/rooms/${uuidToHumanId(row.original.id)}`}>
-                                <DoorOpen />
-                            </Link>
-                        </Button>
-                    </SimpleTooltip>
-                    <SimpleTooltip tipContent="Copy link">
-                        <Button
-                            size="xs"
-                            variant="outline"
-                            className="size-7 p-1"
-                            onClick={handleCopyLink}
-                        >
-                            <Link2 />
-                        </Button>
-                    </SimpleTooltip>
-                </div>
-            );
-        },
+        cell: ({ row }) =>
+            row.original.isActive ? <ActionsColumn roomId={row.original.id} /> : null,
     },
 ];
 

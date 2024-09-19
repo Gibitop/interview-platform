@@ -34,7 +34,6 @@ Dockerfile
 
 db/
 
-
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -42,3 +41,5 @@ db/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+*.env

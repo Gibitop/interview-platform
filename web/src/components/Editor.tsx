@@ -13,10 +13,10 @@ import prettierPluginEstree from 'prettier/plugins/estree';
 import prettierPluginTypeScript from 'prettier/plugins/typescript';
 import { useRoomContext } from './contexts/useRoomContext';
 
-import { getHighlighter } from 'shiki/bundle/web';
+import { getSingletonHighlighter } from 'shiki/bundle/web';
 import { shikiToMonaco } from '@shikijs/monaco';
 
-import reactDtsUrl from '~public/react.d.ts.txt?url';
+import reactDtsUrl from '~/../public/react.d.ts.txt';
 import { useRoomStore } from '~/stores/room';
 import { FilePicker } from './FilePicker';
 import debounce from 'lodash/debounce';
@@ -42,7 +42,7 @@ self.MonacoEnvironment = {
 loader.config({ monaco });
 
 // Create the highlighter, it can be reused
-getHighlighter({
+getSingletonHighlighter({
     themes: ['dark-plus'],
     langs: ['javascript', 'typescript', 'jsx', 'tsx', 'json'],
 }).then(highlighter => shikiToMonaco(highlighter, monaco));

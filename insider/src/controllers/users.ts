@@ -123,7 +123,11 @@ export const setup = (io: Server) => {
 
         users.set(socket.id, user);
 
-        const changeMuUserListener = (data: unknown) => {
+        const changeMuUserListener = (data: unknown, cb?: unknown) => {
+            if (cb && cb instanceof Function) {
+                cb();
+            }
+
             const parsed = zChangeMyUserRequest.safeParse(data);
             if (!parsed.success) {
                 return;

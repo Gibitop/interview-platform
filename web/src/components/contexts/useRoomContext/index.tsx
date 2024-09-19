@@ -87,6 +87,10 @@ export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
         }
     }, [socket]);
 
+    if (!socket?.connected) {
+        return <div>Connecting...</div>;
+    }
+
     return (
         <roomContext.Provider
             value={{

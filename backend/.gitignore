@@ -34,3 +34,5 @@ dist-ssr
 
 # JWT private key
 jwt-private-key.pem
+
+*.env

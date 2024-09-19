@@ -178,14 +178,14 @@ export const roomsRouter = t.router({
                 .where(
                     and(
                         eq(usersRoomsTable.userId, ctx.user.id),
-                        eq(usersRoomsTable.roomId, ctx.user.id),
+                        eq(usersRoomsTable.roomId, input.roomId),
                     ),
                 );
             if (!membership) {
                 throw new TRPCError({ code: 'NOT_FOUND' });
             }
 
-            deleteContainer(input.roomId);
+            await deleteContainer(input.roomId);
         }),
 
     delete: protectedProcedure

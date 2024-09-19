@@ -6,6 +6,7 @@ import { setup as activeFileContentSetup } from './controllers/activeFileContent
 import { setup as activeFilePathSetup } from './controllers/activeFilePath';
 import { setup as terminalSetup } from './controllers/terminal';
 import { setup as uploadSetup } from './controllers/upload';
+import { setup as copySetup } from './controllers/copy';
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -26,6 +27,7 @@ server.get('/', async () => {
 
 server.ready().then(() => {
     usersSetup(server.io);
+    copySetup(server.io);
     activeFilePathSetup(server.io);
     activeFileContentSetup(server.io);
     terminalSetup(server.io);

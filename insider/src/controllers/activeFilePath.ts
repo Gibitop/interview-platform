@@ -6,12 +6,12 @@ import {
     replace as replaceActiveFileContent,
 } from './activeFileContent';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
-import { workDir } from '../config';
+import { env } from '../env';
 import debounce from 'lodash/debounce.js';
 import type { C2SEvent, S2CEvent } from '../eventNames';
 
-let relativeActiveFilePath = 'test.txt';
-let fullActiveFilePath = `${workDir}/${relativeActiveFilePath}`;
+let relativeActiveFilePath = env.START_ACTIVE_FILE_NAME;
+let fullActiveFilePath = `${env.WORKING_DIRECTORY}/${relativeActiveFilePath}`;
 const activeFileUpdateListeners = new Set<() => void>([]);
 
 export const addActiveFileUpdateListener = (listener: () => void) => {
@@ -23,11 +23,11 @@ export const removeActiveFileUpdateListener = (listener: () => void) => {
 
 const changeActiveFilePath = (newRelativePath: string) => {
     relativeActiveFilePath = newRelativePath;
-    fullActiveFilePath = `${workDir}/${relativeActiveFilePath}`;
+    fullActiveFilePath = `${env.WORKING_DIRECTORY}/${relativeActiveFilePath}`;
     activeFileUpdateListeners.forEach(listener => listener());
 }
 
-const getAvailableFilesFullPaths = async (startPath = workDir) => {
+const getAvailableFilesFullPaths = async (startPath = env.WORKING_DIRECTORY) => {
     const out: string[] = [];
 
     const entries = await readdir(startPath);
@@ -55,7 +55,7 @@ const getAvailableFilesFullPaths = async (startPath = workDir) => {
 
 const getAvailableFilesRelativePaths = async () => {
     const paths = await getAvailableFilesFullPaths();
-    return paths.map(path => path.slice(workDir.length + 1));
+    return paths.map(path => path.slice(env.WORKING_DIRECTORY.length + 1));
 }
 
 const fsUpdateListeners = new Set<() => void>([]);
@@ -121,7 +121,7 @@ export const setup = (io: Server) => {
             fsUpdateListeners.forEach(listener => listener());
         }, 100);
 
-        for await (const event of watch(workDir, { recursive: true, signal: fsWatchAbortController.signal })) {
+        for await (const event of watch(env.WORKING_DIRECTORY, { recursive: true, signal: fsWatchAbortController.signal })) {
             if (event.eventType !== 'rename') continue;
             callFsListeners();
         }

@@ -3,3 +3,4 @@
 *.old
 
 *.env
+keys/

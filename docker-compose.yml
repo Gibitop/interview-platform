@@ -1,5 +1,6 @@
 services:
     web:
+        image: ghcr.io/gibitop/interview-platform-web:latest
         build:
             context: ./
             dockerfile: ./web/Dockerfile
@@ -13,6 +14,7 @@ services:
         networks:
             - interview-platform-traefik
     backend:
+        image: ghcr.io/gibitop/interview-platform-backend:latest
         build: './backend'
         restart: always
         depends_on:
@@ -22,35 +24,41 @@ services:
                 condition: service_completed_successfully
             traefik:
                 condition: service_started
-        env_file:
-            - env/backend.env
         environment:
             DOMAIN: $DOMAIN
+            NODE_ENV: $NODE_ENV
+            DATABASE_URL: $DATABASE_URL
+            DOCKER_SOCKET_PATH: $DOCKER_SOCKET_PATH
+            HASHING_SECRET_HEX: $HASHING_SECRET_HEX
+            REGISTRATION_OPEN: $REGISTRATION_OPEN
+            INSIDER_JWT_PUBLIC_KEY_PATH: $INSIDER_JWT_PUBLIC_KEY_PATH
         labels:
             - traefik.enable=true
             - traefik.http.routers.backend.rule=(Host(`$DOMAIN`) && PathPrefix(`/api`))
             - traefik.http.services.backend.loadbalancer.server.port=3000
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
+            - $DOCKER_SOCKET_PATH:/var/run/docker.sock
+            - ./keys/jwt-private-key.pem:/app/jwt-private-key.pem:ro
         networks:
             - db
             - interview-platform-traefik
     migration:
+        image: ghcr.io/gibitop/interview-platform-migration:latest
         build:
             context: ./backend
             dockerfile: ./migration.Dockerfile
         restart: no
+        environment:
+            DATABASE_URL: $DATABASE_URL
         depends_on:
             db:
                 condition: service_healthy
-        env_file:
-            - env/backend.env
         networks:
             - db
     db:
-        image: postgres
+        image: postgres:16.4-alpine3.20
         restart: always
-        user: 'postgres'
+        user: postgres
         environment:
             POSTGRES_PASSWORD: 'password'
             POSTGRES_DB: 'interview-platform'
@@ -64,7 +72,7 @@ services:
         networks:
             - db
     traefik:
-        image: traefik:v3.1.2
+        image: traefik:v3.1.4
         command:
             - --api.dashboard=true
             - --api.insecure=true
@@ -81,7 +89,7 @@ services:
             - '3000:80'
             - '3001:8080'
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
+            - $DOCKER_SOCKET_PATH:/var/run/docker.sock
         networks:
             - interview-platform-traefik
 

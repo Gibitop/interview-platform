@@ -6,7 +6,12 @@ config();
 
 export const env = createEnv({
     server: {
+        /** Set to `true` when using HTTPS */
+        NODE_ENV: z.enum(['development', 'production']),
+
         DATABASE_URL: z.string().url(),
+
+        DOMAIN: z.string().min(1),
 
         /** Path to the docker socket file */
         DOCKER_SOCKET_PATH: z.string().min(1),
@@ -21,27 +26,37 @@ export const env = createEnv({
         REGISTRATION_OPEN: z
             .string()
             .regex(/^(true|false)$/)
-            .pipe(z.preprocess(value => value === 'true', z.boolean())),
+            .pipe(z.preprocess((value: unknown) => value === 'true', z.boolean())),
+
+        INSIDER_JWT_PUBLIC_KEY_PATH: z.string().min(1),
+        INSIDER_ADDITIONAL_LABELS: z.string().optional(),
+        INSIDER_WS_PORT: z.string()
+            .default('5050')
+            .transform((value, ctx) => {
+                const parsed = Number(value);
+
+                if (Number.isNaN(parsed)) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: 'Expected a number',
+                    });
+
+                    return z.NEVER;
+                }
+
+                if (parsed < 1 || parsed > 65535) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: 'Expected a port number between 1 and 65535',
+                    });
+
+                    return z.NEVER;
+                }
+
+                return parsed;
+            }),
     },
 
-    /**
-     * What object holds the environment variables at runtime. This is usually
-     * `process.env` or `import.meta.env`.
-     */
     runtimeEnv: process.env,
-
-    /**
-     * By default, this library will feed the environment variables directly to
-     * the Zod validator.
-     *
-     * This means that if you have an empty string for a value that is supposed
-     * to be a number (e.g. `PORT=` in a ".env" file), Zod will incorrectly flag
-     * it as a type mismatch violation. Additionally, if you have an empty string
-     * for a value that is supposed to be a string with a default value (e.g.
-     * `DOMAIN=` in an ".env" file), the default value will never be applied.
-     *
-     * In order to solve these issues, we recommend that all new projects
-     * explicitly specify this option as true.
-     */
     emptyStringAsUndefined: true,
 });

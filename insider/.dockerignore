@@ -34,7 +34,6 @@ Dockerfile
 
 db/
 
-
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -45,3 +44,8 @@ db/
 
 
 wd/
+
+# JWT public key
+jwt-public-key.pem
+
+*.env

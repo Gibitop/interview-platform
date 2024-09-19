@@ -16,7 +16,15 @@ export const useRoomUsers = (
     const changeMyUser = useCallback(
         (data: ChangeMyUserRequest) => {
             if (!socket || !socket.connected) return;
-            socket.emit('change-my-user' satisfies C2SEvent, data);
+            let ack = false;
+            socket.emit('change-my-user' satisfies C2SEvent, data, () => {
+                ack = true;
+            });
+            setTimeout(() => {
+                if (!ack) {
+                    changeMyUser(data);
+                }
+            }, 200);
 
             setUsers(prev => {
                 if (!socket || !socket.connected) return prev;
