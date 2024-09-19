@@ -20,7 +20,8 @@ PUBLIC_KEY_FILENAME="jwt-public-key.pem"
 
 read -p "This script will rewrite existing keys. Do you want to continue? [y/N] " -n 1 -r
 echo
-if [[ $REPLY =~ ^[Yy]$ ]] then
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
     rm -f ./keys/$PRIVATE_KEY_FILENAME
     rm -f ./keys/$PUBLIC_KEY_FILENAME
     rm -f ./backend/$PRIVATE_KEY_FILENAME
