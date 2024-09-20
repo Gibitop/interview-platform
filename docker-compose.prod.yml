@@ -75,7 +75,7 @@ services:
         image: traefik:v3.1.2
         command:
             - --api.dashboard=false
-            - --api.insecure=fasle
+            - --api.insecure=false
 
             - "--entryPoints.websecure.address=:443"
             - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
@@ -91,9 +91,10 @@ services:
             - --providers.docker.exposedbydefault=false
             - --providers.docker.network=interview-platform-traefik
         ports:
-            - '3000:80'
+            - '4000:80'
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+            - letsencrypt:/letsencrypt
         networks:
             - interview-platform-traefik
 

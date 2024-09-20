@@ -22,7 +22,7 @@ RUN npm install
 RUN npm run build
 
 
-FROM caddy:2.8.4-alpine
+FROM --platform=linux/amd64 caddy:2.8.4-alpine
 
 COPY --from=0 /app/web/dist /srv
 COPY web/Caddyfile /etc/caddy/Caddyfile
