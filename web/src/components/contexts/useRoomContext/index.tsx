@@ -45,7 +45,7 @@ export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
         if (!roomStore) return;
         if (roomStore.role !== 'candidate' && !selfUser) return;
 
-        const sock = io(`ws://${location.host}`, {
+        const sock = io(`${location.protocol.replace('http', 'ws')}//${location.host}`, {
             path: `/insider/${roomStore.roomId}/ws/socket.io`,
             transports: ['websocket'],
             auth: {
