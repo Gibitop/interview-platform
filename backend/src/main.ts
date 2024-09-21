@@ -4,7 +4,8 @@ import fastifyCookie from '@fastify/cookie';
 import { createContext } from './trpc/context';
 import { appRouter, type AppRouter } from './trpc/router';
 import './common/env.js';
-import { ping } from './common/dockerode';
+import { getActiveRoomIds, ping } from './common/dockerode';
+import { stopOvertimeRooms } from './jobs/stop-overtime-rooms';
 
 await ping();
 
@@ -25,6 +26,8 @@ server.register(fastifyTRPCPlugin, {
         },
     } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
 });
+
+stopOvertimeRooms.start();
 
 try {
     server.listen(

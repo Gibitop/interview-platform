@@ -1,11 +1,13 @@
 import Docker from 'dockerode';
 import { type TRoomType, IMAGES } from './roomTypes';
 import { env } from './env';
+import { humanIdToUuid } from './uuid';
 
 const docker = new Docker({ socketPath: env.DOCKER_SOCKET_PATH });
 export const ping = () => docker.ping();
 
-const makeContainerName = (roomId: string) => `interview-platform-room-${roomId.replace(/-/g, '')}`;
+const ROOM_PREFIX = 'interview-platform-room-';
+const makeContainerName = (roomId: string) => `${ROOM_PREFIX}${roomId.replace(/-/g, '')}`;
 
 export const isContainerActive = async (roomId: string) => {
     const container = docker.getContainer(makeContainerName(roomId));
@@ -68,4 +70,14 @@ export const deleteContainer = async (roomId: string) => {
     await docker.getContainer(makeContainerName(roomId)).stop().catch(() => { });
 };
 
-export const getContainers = async () => { };
+export const getActiveRoomIds = async () => {
+    const containers = await docker.listContainers();
+
+    return containers
+        .map(container => container.Names
+            .find(name => name.startsWith(`/${ROOM_PREFIX}`))
+            ?.replace(`/${ROOM_PREFIX}`, '')
+        )
+        .filter(Boolean)
+        .map(humanIdToUuid);
+};

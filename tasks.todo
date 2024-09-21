@@ -11,11 +11,11 @@
 + Containerisation
 + Insider security (not being root + aceess only to working directory)
 + Bug: Reporting copy does not work
-+ Usage docs
 + Stop rooms
-? Bug: Sometimes, there is no user's name on first join
-- Stop containers on cron
-- HTTPS
++ Bug: Sometimes, there is no user's name on first join
++ Stop containers on cron
++ HTTPS
+- Usage docs
 
 # v2.*
 - Loader for room stopping
