@@ -1,24 +1,9 @@
 import type { Server, Socket } from 'socket.io';
-import { z } from 'zod';
-import { implement } from '../utils/implementWithZod';
 import type { C2SEvent, S2CEvent } from '../eventNames';
 import jwt from 'jsonwebtoken';
 import { readFile } from 'fs/promises';
+import { zChangeMyUserRequest, type Role, type User } from '../types/users';
 
-export type Role = 'host' | 'candidate' | 'spectator';
-export type User = {
-    id: string;
-    role: Role;
-    name: string;
-    color: string;
-    selection: {
-        startLine: number;
-        startChar: number;
-        endLine: number;
-        endChar: number;
-    };
-    isFocused: boolean;
-};
 
 const users = new Map<string, User>();
 const hostIds = new Set<string>();
@@ -63,21 +48,6 @@ const broadcastUsers = (io: Server) => {
         }));
     broadcastToRoles(io, 'users-changed' satisfies S2CEvent, userForCandidates, ['candidate']);
 };
-
-const zChangeMyUserRequest = implement<
-    Partial<Pick<User, 'name' | 'selection' | 'isFocused'>>
->().with({
-    name: z.string().optional(),
-    selection: implement<Exclude<User['selection'], null>>().with({
-        startLine: z.number(),
-        startChar: z.number(),
-        endLine: z.number(),
-        endChar: z.number(),
-    }).optional(),
-    isFocused: z.boolean().optional(),
-});
-export type ChangeMyUserRequest = z.infer<typeof zChangeMyUserRequest>;
-
 
 const validateHostJwt = async (token: string): Promise<boolean> => {
     try {

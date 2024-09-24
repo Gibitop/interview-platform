@@ -10,7 +10,7 @@
         "start": "node dist/main.js",
         "drizzle-push": "drizzle-kit push",
         "drizzle-generate": "drizzle-kit generate",
-        "drizzle-migrate": "tsx tools/migrate.ts",
+        "drizzle-migrate": "node tools/migrate.js",
         "drizzle-studio": "drizzle-kit studio"
     },
     "dependencies": {

@@ -29,6 +29,10 @@ server.register(fastifyTRPCPlugin, {
 
 stopOvertimeRooms.start();
 
+server.get('/', async () => {
+    return { hello: 'world' };
+});
+
 try {
     server.listen(
         { port: 3000, host: '0.0.0.0' },

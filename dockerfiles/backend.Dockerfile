@@ -8,12 +8,12 @@ RUN npm install
 RUN npm run build
 
 
-FROM --platform=linux/amd64 node:22.9-alpine3.20
+FROM node:22.9-alpine3.20
 
 WORKDIR /app
 
-COPY --from=0 /app/package.json package.json
-COPY --from=0 /app/package-lock.json /package-lock.json
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 RUN npm install --omit=dev
 
 COPY --from=0 /app/dist dist

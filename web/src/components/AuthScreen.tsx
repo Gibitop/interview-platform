@@ -17,13 +17,16 @@ import { useLogin } from '~/hooks/trpc/useLogin';
 const formSchema = z.discriminatedUnion('tab', [
     z.object({
         tab: z.literal('login'),
-        username: z.string(),
+        username: z.string().transform(val => val.toLowerCase()),
         password: z.string(),
     }),
     z.object({
         tab: z.literal('register'),
         name: z.string().min(1),
-        username: z.string().regex(/^[a-z0-9_-]{4,31}$/, { message: 'Invalid username' }),
+        username: z
+            .string()
+            .regex(/^[a-z0-9_-]{4,31}$/i, { message: 'Invalid username' })
+            .transform(val => val.toLowerCase()),
         password: z.string().min(6).max(255),
     }),
 ]);

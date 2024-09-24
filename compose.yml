@@ -3,7 +3,7 @@ services:
         image: ghcr.io/gibitop/interview-platform-web:latest
         build:
             context: ./
-            dockerfile: ./web/Dockerfile
+            dockerfile: ./dockerfiles/web.Dockerfile
         restart: always
         labels:
             - traefik.enable=true
@@ -15,7 +15,9 @@ services:
             - interview-platform-traefik
     backend:
         image: ghcr.io/gibitop/interview-platform-backend:latest
-        build: './backend'
+        build:
+            context: ./backend
+            dockerfile: ../dockerfiles/backend.Dockerfile
         restart: always
         depends_on:
             db:
@@ -27,7 +29,7 @@ services:
         environment:
             DOMAIN: $DOMAIN
             NODE_ENV: $NODE_ENV
-            DATABASE_URL: $DATABASE_URL
+            DATABASE_URL: 'postgres://postgres:password@db:5432/interview-platform'
             DOCKER_SOCKET_PATH: $DOCKER_SOCKET_PATH
             HASHING_SECRET_HEX: $HASHING_SECRET_HEX
             REGISTRATION_OPEN: $REGISTRATION_OPEN
@@ -46,10 +48,10 @@ services:
         image: ghcr.io/gibitop/interview-platform-migration:latest
         build:
             context: ./backend
-            dockerfile: ./migration.Dockerfile
-        restart: "no"
+            dockerfile: ../dockerfiles/migration.Dockerfile
+        restart: 'no'
         environment:
-            DATABASE_URL: $DATABASE_URL
+            DATABASE_URL: 'postgres://postgres:password@db:5432/interview-platform'
         depends_on:
             db:
                 condition: service_healthy
@@ -74,19 +76,16 @@ services:
     traefik:
         image: traefik:v3.1.4
         command:
-            - --api.dashboard=true
+            - --api.dashboard=false
             - --api.insecure=true
-
-            - --accesslog=true
-            - --log.level=INFO
-
+            - --accesslog=false
+            - --log.level=WARN
             - --providers.docker
             - --providers.docker.exposedbydefault=false
             - --providers.docker.network=interview-platform-traefik
-
             - --entrypoints.web.address=:80
         ports:
-            - '4000:80'
+            - '$PORT:80'
         volumes:
             - $DOCKER_SOCKET_PATH:/var/run/docker.sock
         networks:

@@ -1,33 +1,13 @@
-# v2.0.0
-+ Range selection
-+ Switching files
-+ Watch FS
-+ File uploads
-+ Reading from a file (on fs update)
-+ Validate access
-+ Clear listeners
-+ Validate event arguments
-+ Check JWT
-+ Containerisation
-+ Insider security (not being root + aceess only to working directory)
-+ Bug: Reporting copy does not work
-+ Stop rooms
-+ Bug: Sometimes, there is no user's name on first join
-+ Stop containers on cron
-+ HTTPS
-- Usage docs
-
-# v2.*
-- Loader for room stopping
+- Linting and formatting
+- User management
+- Recording and replaying rooms
+- Other languages support
+- ignore files from being available (eg: node_modules/*)
 - Bundle optimizations
 - Offline recovery
-- .ipignore - ignore files from being available (eg: node_modules/*)
-- Other languages support
 - Iframe
 - Board
-- Recording
-- Replaying
 - Chat
 - Notes
-- SAML
 - Audio recording
+- SAML

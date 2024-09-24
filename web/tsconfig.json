@@ -31,7 +31,7 @@
             "~insider/*": ["../insider/src/*"],
         },
     },
-    "include": ["./src"],
+    "include": ["./src", "./reset.d.ts"],
     "exclude": ["../backend/*", "../insider/*"],
     "references": [
         { "path": "./tsconfig.node.json" },

@@ -92,13 +92,14 @@ export const roomsRouter = t.router({
                     userId: ctx.user.id,
                 });
 
+                await createContainer(
+                    room.id,
+                    input.type,
+                );
+
                 return room;
             });
 
-            await createContainer(
-                room.id,
-                input.type,
-            );
 
             return room;
         }),

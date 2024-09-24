@@ -10,7 +10,7 @@ RUN npm install
 RUN npm run build
 
 
-FROM --platform=linux/amd64 node:22.9-alpine3.20
+FROM node:22.9-alpine3.20
 
 # Required for node-pty
 RUN apk add make python3 g++

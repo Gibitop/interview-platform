@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
-import type { C2SEvent, S2CEvent } from '~/../../insider/src/eventNames';
-import type { ChangeMyUserRequest, User } from '~/../../insider/src/controllers/users';
+import type { C2SEvent, S2CEvent } from '~insider/eventNames';
+import type { ChangeMyUserRequest, User } from '~insider/types/users';
 import { AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 

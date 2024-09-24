@@ -1,46 +1,69 @@
 # Interview platform
 
+A self-hostable platform for conducting technical interviews
+
+![Screenshot](./assets/Screenshot.png)
+
+
 ## Table of contents
 - [Interview platform](#interview-platform)
   - [Table of contents](#table-of-contents)
-  - [Production usage](#production-usage)
+  - [Usage](#usage)
+    - [Production](#production)
+    - [Local](#local)
   - [Development](#development)
-    - [Common](#common)
     - [Web](#web)
     - [Backend](#backend)
     - [Insider](#insider)
-  - [Local usage](#local-usage)
   - [Security](#security)
   - [Scalability](#scalability)
 
 
-## Production usage
-
-<!-- TODO: Write about global .env file -->
+## Usage
 
 Generate JWT keys
 ```bash
 ./tools/generate-jwt-keys.sh
 ```
 
-Build all room images
+Generate a `.env` file
 ```bash
-DOMAIN='localhost' docker-compose -f ./docker-compose.insiders.yml build
+./tools/generate-env.sh
 ```
 
-Build and start the application with https in prod
+### Production
+
+Pull all room images
 ```bash
-DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker-compose -f ./docker-compose.prod.yml up
+docker-compose -f ./compose.insiders.yml pull
 ```
+
+Pull and start the application
+```bash
+docker-compose up --pull -d
+```
+
+
+### Local
+
+Build all room images
+```bash
+docker-compose -f ./compose.insiders.yml build
+```
+
+Build and start the application
+```bash
+docker-compose up --build
+```
+
 
 ## Development
 
-### Common
+Generate JWT keys
+```bash
+./tools/generate-jwt-keys.sh
+```
 
-1. Generate JWT keys
-    ```bash
-    ./tools/generate-jwt-keys.sh
-    ```
 
 ### Web
 
@@ -58,7 +81,8 @@ DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker-compose -f ./docker-c
     ```
 
 > [!NOTE]
-> In dev mode you can only connect to one instance of `insider`
+> While in local development mode you can only connect to one instance of `insider`
+
 
 ### Backend
 
@@ -89,11 +113,13 @@ DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker-compose -f ./docker-c
     npm run dev
     ```
 
-> [!NOTE]
+> [!TIP]
 > You can prototype DB changes using
 > ```bash
 > npm run drizzle-push
 > ```
+
+> [!IMPORTANT]
 > Before committing, run
 > ```bash
 > npm run drizzle-generate
@@ -105,7 +131,7 @@ DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker-compose -f ./docker-c
 
 1. Go to the `insider` directory
     ```bash
-    cd web
+    cd insider
     ```
 2. Install dependecies
     ```bash
@@ -116,28 +142,6 @@ DOMAIN='domain name' LET_ENCRYPT_EMAIL='your email' docker-compose -f ./docker-c
     npm run dev
     ```
 
-## Local usage
-
-Generate JWT keys
-```bash
-./tools/generate-jwt-keys.sh
-```
-
-Build all room images
-```bash
-docker-compose -f ./docker-compose.insiders.yml build
-```
-
-Build main services
-```bash
-docker-compose build
-```
-
-Start the application with http on localhost
-```bash
-docker-compose up
-```
-
 
 ## Security
 
@@ -147,13 +151,14 @@ Currently we expose the host's docker socket to the backend container and to the
 
 For this reason
 > [!CAUTION]
-> **FOR PRODUCTION, USE THIS INSIDE A VIRTUAL MACHINE OR ON AN ISOLATED SERVER**
+> **For production use this inside a virtual machine or on an isolated server**
 
 In future there is a plan to move to resolve this issue, but additional research is needed.
 
 
 ## Scalability
 
-Currently horizontal scaling is not supported. This should not be a problem for most users, who want to use the system for technical interviews in their own company
+Currently horizontal scaling is not supported.
+This should not be a problem for most users, who want to use the system for technical interviews in their company
 
 However horizontal scaling through kubernetes might be supported in the future

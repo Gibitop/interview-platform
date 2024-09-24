@@ -8,7 +8,7 @@ import { useRoomUsers } from './useRoomUsers';
 import { useActiveFileContent } from './useActiveFileContent';
 import { useCandidateCopy } from './useCandidateCopy';
 import { useTerminal } from './useTerminal';
-import type { ChangeMyUserRequest, User } from '~insider/controllers/users';
+import type { ChangeMyUserRequest, User } from '~insider/types/users';
 import { useActiveFilePath } from './useActiveFilePath';
 import { useUploadFile } from './useUploadFile';
 

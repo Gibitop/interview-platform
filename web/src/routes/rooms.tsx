@@ -29,7 +29,7 @@ const ActionsColumn = ({ roomId }: { roomId: string }) => {
     const { confirm } = useAlertDialog();
 
     const handleCopyLink = () => {
-        navigator.clipboard.writeText(`${window.location.origin}/rooms/${roomId}`);
+        navigator.clipboard.writeText(`${window.location.origin}/rooms/${uuidToHumanId(roomId)}`);
         toast.success('Room link copied!');
     };
 

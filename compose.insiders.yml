@@ -4,4 +4,6 @@
 services:
     insider-node:
         image: ghcr.io/gibitop/interview-platform-insider-node:latest
-        build: './insider'
+        build:
+            context: ./insider
+            dockerfile: ../dockerfiles/insider-node.Dockerfile
