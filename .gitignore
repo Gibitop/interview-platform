@@ -1,0 +1,7 @@
+.vscode/
+
+*.old
+
+keys/
+*.env
+!example.env

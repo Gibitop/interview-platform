@@ -1,0 +1,100 @@
+services:
+    web:
+        image: ghcr.io/gibitop/interview-platform-web:latest
+        build:
+            context: ./
+            dockerfile: ./dockerfiles/web.Dockerfile
+        restart: always
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.web.rule=Host(`$DOMAIN`)
+        depends_on:
+            - traefik
+            - backend
+        networks:
+            - interview-platform-traefik
+    backend:
+        image: ghcr.io/gibitop/interview-platform-backend:latest
+        build:
+            context: ./backend
+            dockerfile: ../dockerfiles/backend.Dockerfile
+        restart: always
+        depends_on:
+            db:
+                condition: service_healthy
+            migration:
+                condition: service_completed_successfully
+            traefik:
+                condition: service_started
+        environment:
+            DOMAIN: $DOMAIN
+            NODE_ENV: $NODE_ENV
+            DATABASE_URL: 'postgres://postgres:password@db:5432/interview-platform'
+            DOCKER_SOCKET_PATH: $DOCKER_SOCKET_PATH
+            HASHING_SECRET_HEX: $HASHING_SECRET_HEX
+            REGISTRATION_OPEN: $REGISTRATION_OPEN
+            INSIDER_JWT_PUBLIC_KEY_PATH: $INSIDER_JWT_PUBLIC_KEY_PATH
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.backend.rule=(Host(`$DOMAIN`) && PathPrefix(`/api`))
+            - traefik.http.services.backend.loadbalancer.server.port=3000
+        volumes:
+            - $DOCKER_SOCKET_PATH:/var/run/docker.sock
+            - ./keys/jwt-private-key.pem:/app/jwt-private-key.pem:ro
+        networks:
+            - db
+            - interview-platform-traefik
+    migration:
+        image: ghcr.io/gibitop/interview-platform-migration:latest
+        build:
+            context: ./backend
+            dockerfile: ../dockerfiles/migration.Dockerfile
+        restart: 'no'
+        environment:
+            DATABASE_URL: 'postgres://postgres:password@db:5432/interview-platform'
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - db
+    db:
+        image: postgres:16.4-alpine3.20
+        restart: always
+        user: postgres
+        environment:
+            POSTGRES_PASSWORD: 'password'
+            POSTGRES_DB: 'interview-platform'
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready']
+            interval: 1s
+            timeout: 5s
+            retries: 10
+        networks:
+            - db
+    traefik:
+        image: traefik:v3.1.4
+        command:
+            - --api.dashboard=false
+            - --api.insecure=true
+            - --accesslog=false
+            - --log.level=WARN
+            - --providers.docker
+            - --providers.docker.exposedbydefault=false
+            - --providers.docker.network=interview-platform-traefik
+            - --entrypoints.web.address=:80
+        ports:
+            - '$PORT:80'
+        volumes:
+            - $DOCKER_SOCKET_PATH:/var/run/docker.sock
+        networks:
+            - interview-platform-traefik
+
+volumes:
+    pgdata:
+
+networks:
+    interview-platform-traefik:
+        name: interview-platform-traefik
+    db:

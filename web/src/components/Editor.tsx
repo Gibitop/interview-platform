@@ -1,42 +1,196 @@
-import { Editor as MonacoEditor, OnMount } from '@monaco-editor/react';
-import { MonacoBinding } from 'y-monaco';
-import { useYjs } from './contexts/YjsContext';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import * as monaco from 'monaco-editor';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
+import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import { Editor as MonacoEditor, OnMount, loader } from '@monaco-editor/react';
+import { useEffect, useMemo, useState } from 'react';
 import type { editor } from 'monaco-editor';
-import { useWebContainer } from '~/hooks/useWebContainer';
-import { useRoomStore } from '~/stores/room';
-import { useUsers } from './contexts/UsersContext';
 import { Button } from './ui/button';
 import prettier from 'prettier/standalone';
 import prettierPluginEstree from 'prettier/plugins/estree';
 import prettierPluginTypeScript from 'prettier/plugins/typescript';
+import { useRoomContext } from './contexts/useRoomContext';
+
+import { getSingletonHighlighter } from 'shiki/bundle/web';
+import { shikiToMonaco } from '@shikijs/monaco';
+
+import reactDtsUrl from '~/../public/react.d.ts.txt';
+import { useRoomStore } from '~/stores/room';
 import { FilePicker } from './FilePicker';
-import { RotateCw } from 'lucide-react';
+import debounce from 'lodash/debounce';
+
+// Don't use CDN
+self.MonacoEnvironment = {
+    async getWorker(_, label) {
+        if (label === 'json') {
+            return new jsonWorker();
+        }
+        if (label === 'css' || label === 'scss' || label === 'less') {
+            return new cssWorker();
+        }
+        if (label === 'html' || label === 'handlebars' || label === 'razor') {
+            return new htmlWorker();
+        }
+        if (label === 'typescript' || label === 'javascript') {
+            return new tsWorker();
+        }
+        return new editorWorker();
+    },
+};
+loader.config({ monaco });
+
+// Create the highlighter, it can be reused
+getSingletonHighlighter({
+    themes: ['dark-plus'],
+    langs: ['javascript', 'typescript', 'jsx', 'tsx', 'json'],
+}).then(highlighter => shikiToMonaco(highlighter, monaco));
+
+const format = async (text: string) =>
+    prettier.format(text, {
+        parser: 'typescript',
+        semi: true,
+        tabWidth: 4,
+        printWidth: 100,
+        singleQuote: true,
+        trailingComma: 'all',
+        arrowParens: 'avoid',
+        plugins: [prettierPluginEstree, prettierPluginTypeScript],
+    });
+
+const monacoPrettier: monaco.languages.DocumentRangeFormattingEditProvider &
+    monaco.languages.DocumentFormattingEditProvider = {
+    async provideDocumentFormattingEdits(model: monaco.editor.ITextModel) {
+        const text = model.getValue();
+        const formatted = await format(text);
+        return [
+            {
+                range: model.getFullModelRange(),
+                text: formatted,
+            },
+        ];
+    },
+    async provideDocumentRangeFormattingEdits(
+        model: monaco.editor.ITextModel,
+        range: monaco.Range,
+    ) {
+        const text = model.getValueInRange(range);
+        const formatted = await format(text);
+        return [
+            {
+                range,
+                text: formatted,
+            },
+        ];
+    },
+};
+
+monaco.languages.registerDocumentRangeFormattingEditProvider(
+    ['typescript', 'javascript', 'jsx', 'tsx', 'json'],
+    monacoPrettier,
+);
+monaco.languages.registerDocumentFormattingEditProvider(
+    ['typescript', 'javascript', 'jsx', 'tsx', 'json'],
+    monacoPrettier,
+);
 
 export const Editor = () => {
-    const yjs = useYjs();
     const [monacoEditor, setMonacoEditor] = useState<editor.IStandaloneCodeEditor | null>(null);
-    const { isHost, activeFile } = useRoomStore(s => ({
-        isHost: s.isHost,
-        activeFile: s.activeFile,
-    }));
 
-    const wc = useWebContainer(!isHost);
+    const isSpectator = useRoomStore(data => data?.role === 'host' && data.isSpectator);
+    const roomContext = useRoomContext();
+    const changeMyUser = roomContext?.changeMyUser;
 
-    // Connect Yjs to Monaco
+    // Send cursor position to the server
     useEffect(() => {
-        if (!yjs || !monacoEditor) return;
-        new MonacoBinding(
-            yjs!.monacoTextType,
-            monacoEditor.getModel()!,
-            new Set([monacoEditor]),
-            yjs!.provider.awareness,
-        );
-    }, [yjs, monacoEditor]);
+        if (!changeMyUser || !monacoEditor) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const debouncedSendCursor = debounce((e: editor.ICursorSelectionChangedEvent) => {
+            changeMyUser({
+                selection: {
+                    startLine: e.selection.startLineNumber,
+                    startChar: e.selection.startColumn,
+                    endLine: e.selection.endLineNumber,
+                    endChar: e.selection.endColumn,
+                },
+            });
+        }, 20);
+
+        monacoEditor.onDidChangeCursorSelection(debouncedSendCursor);
+    }, [changeMyUser, monacoEditor]);
+
+    // Draw user cursors
+    useEffect(() => {
+        if (!roomContext?.users || !monacoEditor) return;
+
+        const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+        for (const { id, selection } of roomContext.users) {
+            if (id === roomContext.myId) continue;
+
+            decorations.push({
+                options: {
+                    stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                    className: 'yRemoteSelection yRemoteSelection-' + id,
+                    beforeContentClassName: 'yRemoteSelectionHead yRemoteSelectionHead-' + id,
+                },
+                range: new monaco.Range(
+                    selection.startLine,
+                    selection.startChar,
+                    selection.endLine,
+                    selection.endChar,
+                ),
+            });
+        }
+
+        const collection = monacoEditor.createDecorationsCollection(decorations);
+
+        return () => {
+            collection.clear();
+        };
+    }, [monacoEditor, roomContext?.users, roomContext?.myId]);
+
     const handleMonacoMount: OnMount = (editor, monaco) => {
         setMonacoEditor(editor);
+
+        editor.updateOptions({ contextmenu: false });
+
+        // Could not find a way to detect the general copy behavior
+        editor.onKeyDown(e => {
+            const { keyCode, ctrlKey, metaKey } = e;
+
+            // Ctrl / Cmd + C
+            if ((metaKey || ctrlKey) && keyCode === monaco.KeyCode.KeyC) {
+                roomContext?.reportCopy();
+            }
+        });
+
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            target: monaco.languages.typescript.ScriptTarget.Latest,
+            allowNonTsExtensions: true,
+            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+            module: monaco.languages.typescript.ModuleKind.ESNext,
+            noEmit: true,
+            esModuleInterop: true,
+            jsx: monaco.languages.typescript.JsxEmit.React,
+            reactNamespace: 'React',
+            allowJs: true,
+            typeRoots: ['node_modules/@types'],
+        });
+
+        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+            noSemanticValidation: false,
+            noSyntaxValidation: false,
+        });
+
+        fetch(reactDtsUrl)
+            .then(res => res.text())
+            .then(reactDts => {
+                monaco.languages.typescript.typescriptDefaults.addExtraLib(
+                    reactDts,
+                    `file:///node_modules/@types/react/index.d.ts`,
+                );
+            });
 
         // By default, monaco use the "value" property to create its own model without
         // any extensions, so typescript assumes ".ts"
@@ -46,67 +200,48 @@ export const Editor = () => {
             '',
             'typescript',
             // Typescript must see the 'file' it is editing as having a .tsx extension
-            monaco.Uri.file('file.tsx'), // Pass the file name to the model here.
+            monaco.Uri.parse('file:///main.tsx'), // Pass the file name to the model here.
         );
 
-        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-            // 2 = react
-            jsx: 2,
-        });
-        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: false,
-            noSyntaxValidation: false,
-        });
         editor.setModel(codeModel);
     };
 
-    // Sync the active file with Yjs
+    // Send active file content changes to the server
     useEffect(() => {
-        if (!yjs) return;
+        if (!monacoEditor || !roomContext) return;
 
-        const listener: Parameters<typeof yjs.activeFileTextType.observe>[0] = () => {
-            useRoomStore.setState({ activeFile: yjs.activeFileTextType.toString() });
-        };
-        yjs.activeFileTextType.observe(listener);
+        monacoEditor.onDidChangeModelContent(event => {
+            if (roomContext.getActiveFileContent() === monacoEditor.getModel()?.getValue()) return;
 
-        // Only host can change the active file
-        if (
-            isHost &&
-            yjs.provider.room?.synced &&
-            activeFile !== yjs.activeFileTextType.toString()
-        ) {
-            yjs.activeFileTextType.delete(0, yjs.activeFileTextType.toString().length);
-            yjs.activeFileTextType.insert(0, activeFile);
-        }
+            roomContext?.updateActiveFileContent((ins, del) => {
+                event.changes
+                    .sort((change1, change2) => change2.rangeOffset - change1.rangeOffset)
+                    .forEach(change => {
+                        if (change.rangeLength) {
+                            del(change.rangeOffset, change.rangeLength);
+                        }
+                        if (change.text) {
+                            ins(change.rangeOffset, change.text);
+                        }
+                    });
+            });
+        });
+    }, [monacoEditor, roomContext]);
 
-        return () => {
-            yjs.activeFileTextType.unobserve(listener);
-        };
-    }, [activeFile, isHost, yjs]);
-
-    // Prettier formatting
-    const handleFormat = () => {
+    // Read-only mode for spectators
+    useEffect(() => {
         if (!monacoEditor) return;
-        prettier
-            .format(monacoEditor.getValue(), {
-                parser: 'typescript',
-                semi: true,
-                tabWidth: 4,
-                printWidth: 100,
-                singleQuote: true,
-                trailingComma: 'all',
-                arrowParens: 'avoid',
-                plugins: [prettierPluginEstree, prettierPluginTypeScript],
-            })
-            .then(formatted => monacoEditor.setValue(formatted));
-    };
+        monacoEditor.updateOptions({
+            readOnly: isSpectator,
+            readOnlyMessage: { value: "Can't edit code as a spectator" },
+        });
+    }, [isSpectator, monacoEditor]);
 
-    // Add user cursors
-    const users = useUsers();
+    // Other users cursors style
     const styleSheet = useMemo(() => {
         let cursorStyles = '';
 
-        for (const { id, name, color } of users) {
+        for (const { id, name, color } of roomContext?.users ?? []) {
             cursorStyles += `
                 .yRemoteSelection-${id},
                 .yRemoteSelectionHead-${id}  {
@@ -119,85 +254,44 @@ export const Editor = () => {
         }
 
         return { __html: cursorStyles };
-    }, [users]);
+    }, [roomContext?.users]);
 
-    const getActiveFileContent = useCallback(async () => {
-        if (!wc || !activeFile) return;
-        let activeFileContent = await wc.fs.readFile(activeFile).catch(() => {
-            wc.fs.writeFile(activeFile, '');
-            return '';
-        });
-        if (activeFileContent instanceof Uint8Array) {
-            activeFileContent = new TextDecoder().decode(activeFileContent);
-        }
-        return activeFileContent;
-    }, [activeFile, wc]);
-
-    // Change the active file and follow external changes
+    // Hack to keep the cursor position from jumping to the end of the file when other users edit the file
     useEffect(() => {
-        if (!wc || !monacoEditor) return;
+        const newContent = roomContext?.activeFileContent ?? '';
+        if (newContent === monacoEditor?.getValue()) return;
 
-        (async () => {
-            const activeFileContent = await getActiveFileContent();
+        const selection = monacoEditor?.getSelection();
+        if (!selection) return;
 
-            // ! BUG:
-            // If host reloads, when the wc is ready, the file will be read and it will be empty
-            // This will overwrite the editor content with an empty string, deleting the work
-            // If we check if the file is empty, we can avoid this
-            // But when we open an empty file next, we will copy the editor content to the file
-            // Which is not ideal, but better than losing the work
-
-            // Don't overwrite the editor content if the local file is empty
-            if (activeFileContent) {
-                monacoEditor.setValue(activeFileContent);
-            }
-
-            // ! BUG: Resets cursor on fs heavy operations (like tests with --watch)
-            // wc.fs.watch(activeFile, async event => {
-            //     if (event === 'change') {
-            //         activeFileContent = await wc.fs.readFile(activeFile);
-            //         if (activeFileContent instanceof Uint8Array) {
-            //             activeFileContent = new TextDecoder().decode(activeFileContent);
-            //         }
-            //         if (activeFileContent.toString() !== monacoEditor.getValue()) {
-            //             monacoEditor.setValue(activeFileContent.toString() || '');
-            //         }
-            //     }
-            // });
-        })();
-    }, [activeFile, getActiveFileContent, monacoEditor, wc]);
+        monacoEditor?.setValue(newContent);
+        monacoEditor?.setSelection(selection);
+    }, [monacoEditor, roomContext?.activeFileContent]);
 
     return (
         <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
             <div className="px-3 py-2 flex justify-between">
-                {isHost ? <FilePicker /> : activeFile}
+                <FilePicker />
                 <div className="flex gap-2">
-                    {isHost && (
-                        <Button
-                            size="xs"
-                            variant="secondary"
-                            className="aspect-square p-0"
-                            onClick={() =>
-                                getActiveFileContent().then(content =>
-                                    monacoEditor?.setValue(content || ''),
-                                )
-                            }
-                        >
-                            <RotateCw className="size-3" />
-                        </Button>
-                    )}
-                    <Button size="xs" variant="secondary" onClick={handleFormat}>
+                    <Button
+                        size="xs"
+                        variant="secondary"
+                        onClick={() =>
+                            monacoEditor?.getAction('editor.action.formatDocument')?.run()
+                        }
+                    >
                         Format
                     </Button>
                 </div>
             </div>
-            <MonacoEditor
-                theme="vs-dark"
-                onMount={handleMonacoMount}
-                onChange={val => wc?.fs.writeFile(activeFile, val || '')}
-                options={{ fontSize: 14, minimap: { enabled: false } }}
-            />
+            <div className="flex-1" onContextMenu={e => e.preventDefault()}>
+                <MonacoEditor
+                    theme="dark-plus"
+                    onMount={handleMonacoMount}
+                    options={{ fontSize: 14, minimap: { enabled: false } }}
+                />
+            </div>
         </div>
     );
 };

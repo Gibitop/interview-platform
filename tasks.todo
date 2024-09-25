@@ -1,0 +1,13 @@
+- Linting and formatting
+- User management
+- Recording and replaying rooms
+- Other languages support
+- ignore files from being available (eg: node_modules/*)
+- Bundle optimizations
+- Offline recovery
+- Iframe
+- Board
+- Chat
+- Notes
+- Audio recording
+- SAML

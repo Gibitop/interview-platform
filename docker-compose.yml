@@ -1,9 +1,0 @@
-services:
-    web:
-        build: './web'
-        restart: always
-        ports: [0.0.0.0:3000:4173]
-    server:
-        build: './server'
-        restart: always
-        ports: [0.0.0.0:3001:4444]

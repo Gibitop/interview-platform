@@ -1,0 +1,48 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "dev": "tsx --watch src/main.ts",
+        "check-types": "tsc --noEmit",
+        "build": "rm -rf ./dist/* && swc ./src/* -d ./dist --config-file .swcrc --strip-leading-paths && fix-esm-import-path ./dist",
+        "start": "node dist/main.js",
+        "drizzle-push": "drizzle-kit push",
+        "drizzle-generate": "drizzle-kit generate",
+        "drizzle-migrate": "node tools/migrate.js",
+        "drizzle-studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "@fastify/cookie": "9.3.1",
+        "@lucia-auth/adapter-drizzle": "1.1.0",
+        "@t3-oss/env-core": "0.11.1",
+        "@trpc/server": "11.0.0-rc.522",
+        "argon2": "0.41.1",
+        "dockerode": "4.0.2",
+        "dotenv": "16.4.5",
+        "drizzle-orm": "0.33.00",
+        "fastify": "4.27.0",
+        "jsonwebtoken": "9.0.2",
+        "lodash": "4.17.21",
+        "lucia": "3.2.0",
+        "node-cron": "3.0.3",
+        "postgres": "3.4.4",
+        "superjson": "2.2.1",
+        "zod": "3.23.8"
+    },
+    "devDependencies": {
+        "@swc/cli": "0.4.0",
+        "@swc/core": "1.7.26",
+        "@total-typescript/ts-reset": "0.6.1",
+        "@types/dockerode": "3.3.31",
+        "@types/jsonwebtoken": "9.0.7",
+        "@types/lodash": "4.17.7",
+        "@types/node": "22.5.5",
+        "@types/node-cron": "3.0.11",
+        "drizzle-kit": "0.24.2",
+        "fix-esm-import-path": "1.10.0",
+        "tsx": "4.19.1",
+        "typescript": "5.6.2"
+    }
+}

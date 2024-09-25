@@ -1,19 +1,17 @@
 import { create } from 'zustand';
 
-export type TRoomParticipantRole = 'host' | 'interviewee';
-
 export type TRoom = {
     roomId: string;
-    myUsername: string;
-    isHost: boolean;
-    activeFile: string;
-};
+} & (
+    | {
+          role: 'candidate';
+          name: string;
+      }
+    | {
+          role: 'host';
+          isSpectator: boolean;
+          token: string;
+      }
+);
 
-export const defaultRoom: TRoom = {
-    roomId: '',
-    myUsername: '',
-    isHost: false,
-    activeFile: 'index.js',
-};
-
-export const useRoomStore = create<TRoom>(() => structuredClone(defaultRoom));
+export const useRoomStore = create<TRoom | null>(() => null);

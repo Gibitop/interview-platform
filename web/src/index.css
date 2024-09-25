@@ -19,10 +19,10 @@ body {
     border-bottom: var(--user-color) solid 2px;
     height: 100%;
     box-sizing: border-box;
-    /* opacity: 0.7; */
 }
 
 .yRemoteSelectionHead::after {
+    z-index: 1;
     position: absolute;
     content: ' ';
     font-size: 10px;
