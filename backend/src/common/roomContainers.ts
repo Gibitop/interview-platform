@@ -53,7 +53,7 @@ export const createContainer = async ({ createdAt, id, name: roomName, type }: R
         },
         Env: [
             `NODE_ENV=${env.NODE_ENV}`,
-            `ROOM_INFO=${SuperJSON.serialize({ createdAt, id, name: roomName, type } satisfies RoomInfo)}`,
+            `ROOM_INFO=${SuperJSON.stringify({ createdAt, id, name: roomName, type } satisfies RoomInfo)}`,
         ],
         Labels: {
             ...additionalLabels,
