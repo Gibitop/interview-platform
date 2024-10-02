@@ -27,6 +27,7 @@
         "baseUrl": ".",
         "paths": {
             "~/*": ["./src/*"],
+            "~public": ["./public/*"],
             "~backend/*": ["../backend/src/*"],
             "~insider/*": ["../insider/src/*"],
         },

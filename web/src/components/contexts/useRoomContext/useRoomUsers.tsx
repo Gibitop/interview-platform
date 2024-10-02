@@ -16,15 +16,18 @@ export const useRoomUsers = (
     const changeMyUser = useCallback(
         (data: ChangeMyUserRequest) => {
             if (!socket || !socket.connected) return;
-            let ack = false;
-            socket.emit('change-my-user' satisfies C2SEvent, data, () => {
-                ack = true;
-            });
-            setTimeout(() => {
-                if (!ack) {
-                    changeMyUser(data);
-                }
-            }, 200);
+
+            if (role !== 'recorder') {
+                let ack = false;
+                socket.emit('change-my-user' satisfies C2SEvent, data, () => {
+                    ack = true;
+                });
+                setTimeout(() => {
+                    if (!ack) {
+                        changeMyUser(data);
+                    }
+                }, 200);
+            }
 
             setUsers(prev => {
                 if (!socket || !socket.connected) return prev;
@@ -97,5 +100,9 @@ export const useRoomUsers = (
         };
     }, [changeMyUser, myName, role, socket]);
 
-    return { users, changeMyUser };
+    const resetState = () => {
+        setUsers([]);
+    };
+
+    return { users, changeMyUser, resetState };
 };

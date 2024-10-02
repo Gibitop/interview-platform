@@ -8,6 +8,13 @@
       "when": 1726518251743,
       "tag": "0000_normal_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1727647378904,
+      "tag": "0001_vengeful_fixer",
+      "breakpoints": true
     }
   ]
 }

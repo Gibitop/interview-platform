@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import type { C2SEvent, S2CEvent } from '~insider/eventNames';
-import { useRoomStore } from '~/stores/room';
+import type { Role } from '~insider/types/users';
 
-export const useTerminal = (socket: Socket | null) => {
-    const role = useRoomStore(s => s?.role);
+export const useTerminal = (socket: Socket | null, role?: Role) => {
     const terminalOutputListeners = useRef<((data: string) => void)[]>([]);
 
     const addTerminalOutputListener = useCallback((cb: (data: string) => void) => {
@@ -40,5 +39,9 @@ export const useTerminal = (socket: Socket | null) => {
         };
     }, [socket]);
 
-    return { addTerminalOutputListener, removeTerminalOutputListener, writeToTerminal };
+    const resetState = useCallback(() => {
+        terminalOutputListeners.current.forEach(listener => listener('\x1b[2J\x1b[H'));
+    }, []);
+
+    return { addTerminalOutputListener, removeTerminalOutputListener, writeToTerminal, resetState };
 };

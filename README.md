@@ -9,8 +9,6 @@ A self-hostable platform for conducting technical interviews
 - [Interview platform](#interview-platform)
   - [Table of contents](#table-of-contents)
   - [Usage](#usage)
-    - [Production](#production)
-    - [Local](#local)
   - [Development](#development)
     - [Web](#web)
     - [Backend](#backend)
@@ -31,29 +29,15 @@ Generate a `.env` file
 ./tools/generate-env.sh
 ```
 
-### Production
-
-Pull all room images
-```bash
-docker-compose -f ./compose.insiders.yml pull
-```
-
-Pull and start the application
-```bash
-docker-compose up --pull -d
-```
-
-
-### Local
 
 Build all room images
 ```bash
-docker-compose -f ./compose.insiders.yml build
+docker compose -f ./compose.insiders.yml build
 ```
 
 Build and start the application
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 
@@ -133,11 +117,18 @@ Generate JWT keys
     ```bash
     cd insider
     ```
-2. Install dependecies
+2. Create a `.env` file like this:
+    ```bash
+    NODE_ENV='development'
+    WORKING_DIRECTORY='./wd'
+    START_ACTIVE_FILE_NAME='index.ts'
+    ROOM_INFO='{"json":{"id":"69a1c450-9701-4c0d-bb36-b839c79f3526","name":"test-room","type":"node","createdAt":"2024-10-02T19:57:11.011Z"},"meta":{"values":{"createdAt":["Date"]}}}'
+    ```
+3. Install dependecies
     ```bash
     npm install
     ```
-3. Start dev server
+4. Start dev server
     ```bash
     npm run dev
     ```

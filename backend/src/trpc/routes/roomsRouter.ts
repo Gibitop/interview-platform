@@ -8,18 +8,17 @@ import {
 } from '../../common/pagination';
 import { db } from '../../db/index';
 import { roomsTable } from '../../db/tables/roomsTable';
-import { and, count, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNull } from 'drizzle-orm';
 import { usersRoomsTable } from '../../db/tables/usersRoomsTable';
 import { TRPCError } from '@trpc/server';
 import { ROOM_TYPES } from '../../common/roomTypes';
-import { createContainer, deleteContainer, isContainerActive } from '../../common/dockerode';
-import jwt from 'jsonwebtoken';
-import { readFile } from 'fs/promises';
-
-const START_PORT = 4000;
+import { createContainer, deleteContainer, isContainerActive } from '../../common/roomContainers';
+import { deleteRecording, getRecording, getRecordingsRoomsList, saveRecording } from '../../common/recordings';
+import { humanIdToUuid, uuidToHumanId } from '../../common/uuid';
+import { generateInsiderToken } from '../../common/tokens';
 
 export const roomsRouter = t.router({
-    getMy: protectedProcedure
+    getMyRooms: protectedProcedure
         .input(
             z.object({
                 pagination: zRequestPagination,
@@ -28,6 +27,7 @@ export const roomsRouter = t.router({
         .query(async ({ ctx, input }) => {
             const where = and(
                 eq(usersRoomsTable.userId, ctx.user.id),
+                isNull(roomsTable.recordingPath),
             );
 
             const [rooms, totalRes] = await Promise.all([
@@ -56,16 +56,78 @@ export const roomsRouter = t.router({
             const total = totalRes[0]?.count ?? 0;
 
             const roomsWithIsActive = await Promise.all(
-                rooms.map(async (room) => ({
+                rooms.map(async room => ({
                     ...room,
                     isActive: await isContainerActive(room.id),
-                }))
+                })),
             );
 
             return {
                 rooms: roomsWithIsActive,
                 pagination: makeResponsePagination(input.pagination, total),
             };
+        }),
+
+    getMyRecordings: protectedProcedure
+        .input(
+            z.object({
+                pagination: zRequestPagination,
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            const allRecordings = await getRecordingsRoomsList();
+            const where = and(
+                eq(usersRoomsTable.userId, ctx.user.id),
+                inArray(roomsTable.id, allRecordings.map(humanIdToUuid)),
+            );
+
+            const [recordings, totalRes] = await Promise.all([
+                db
+                    .select({
+                        id: roomsTable.id,
+                        name: roomsTable.name,
+                        type: roomsTable.type,
+                        createdAt: roomsTable.createdAt,
+                    })
+                    .from(roomsTable)
+                    .innerJoin(usersRoomsTable, eq(roomsTable.id, usersRoomsTable.roomId))
+                    .where(where)
+                    .orderBy(desc(roomsTable.createdAt))
+                    .limit(input.pagination.perPage ?? PER_PAGE_DEFAULT)
+                    .offset(getOffset(input.pagination)),
+
+                db
+                    .select({ count: count() })
+                    .from(roomsTable)
+                    .innerJoin(usersRoomsTable, eq(roomsTable.id, usersRoomsTable.roomId))
+                    .where(where),
+            ]);
+
+            const total = totalRes[0]?.count ?? 0;
+            return {
+                recordings,
+                pagination: makeResponsePagination(input.pagination, total),
+            };
+        }),
+
+    getRecording: protectedProcedure
+        .input(z.object({ roomId: z.string().uuid() }))
+        .query(async ({ ctx, input }) => {
+            const [membership] = await db
+                .select()
+                .from(usersRoomsTable)
+                .where(
+                    and(
+                        eq(usersRoomsTable.userId, ctx.user.id),
+                        eq(usersRoomsTable.roomId, input.roomId),
+                    ),
+                );
+
+            if (!membership) {
+                throw new TRPCError({ code: 'NOT_FOUND' });
+            }
+
+            return getRecording(input.roomId);
         }),
 
     create: protectedProcedure
@@ -92,14 +154,10 @@ export const roomsRouter = t.router({
                     userId: ctx.user.id,
                 });
 
-                await createContainer(
-                    room.id,
-                    input.type,
-                );
+                await createContainer(room);
 
                 return room;
             });
-
 
             return room;
         }),
@@ -137,33 +195,7 @@ export const roomsRouter = t.router({
                 throw new TRPCError({ code: 'NOT_FOUND' });
             }
 
-            const token = jwt.sign(
-                { roomId: input.roomId },
-                await readFile('./jwt-private-key.pem', 'utf-8'),
-                {
-                    algorithm: 'RS256',
-                    expiresIn: '24h',
-                },
-            );
-
-            return token;
-        }),
-
-    leave: protectedProcedure
-        .input(
-            z.object({
-                roomId: z.string().uuid(),
-            }),
-        )
-        .mutation(async ({ ctx, input }) => {
-            await db
-                .delete(usersRoomsTable)
-                .where(
-                    and(
-                        eq(usersRoomsTable.userId, ctx.user.id),
-                        eq(usersRoomsTable.roomId, ctx.user.id),
-                    ),
-                );
+            return generateInsiderToken(uuidToHumanId(input.roomId));
         }),
 
     stop: protectedProcedure
@@ -186,6 +218,7 @@ export const roomsRouter = t.router({
                 throw new TRPCError({ code: 'NOT_FOUND' });
             }
 
+            await saveRecording(input.roomId);
             await deleteContainer(input.roomId);
         }),
 
@@ -196,16 +229,29 @@ export const roomsRouter = t.router({
             }),
         )
         .mutation(async ({ ctx, input }) => {
-            // TODO: Stop the container, if running
-            // TODO: Remove recording data
+            const [membership] = await db
+                .select()
+                .from(usersRoomsTable)
+                .where(
+                    and(
+                        eq(usersRoomsTable.userId, ctx.user.id),
+                        eq(usersRoomsTable.roomId, input.roomId),
+                    ),
+                );
 
+            if (!membership) {
+                throw new TRPCError({ code: 'NOT_FOUND' });
+            }
+
+            await deleteContainer(input.roomId);
+            await deleteRecording(input.roomId);
             await db.delete(roomsTable).where(eq(roomsTable.id, input.roomId));
         }),
 
     roomExists: publicProcedure
         .input(z.object({ roomId: z.string().uuid() }))
         .query(async ({ input }) => {
-            if (! await isContainerActive(input.roomId)) {
+            if (!(await isContainerActive(input.roomId))) {
                 return false;
             }
 

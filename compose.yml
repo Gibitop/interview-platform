@@ -34,6 +34,7 @@ services:
             HASHING_SECRET_HEX: $HASHING_SECRET_HEX
             REGISTRATION_OPEN: $REGISTRATION_OPEN
             INSIDER_JWT_PUBLIC_KEY_PATH: $INSIDER_JWT_PUBLIC_KEY_PATH
+            RECORDINGS_DIR: './recordings'
         labels:
             - traefik.enable=true
             - traefik.http.routers.backend.rule=(Host(`$DOMAIN`) && PathPrefix(`/api`))
@@ -41,6 +42,7 @@ services:
         volumes:
             - $DOCKER_SOCKET_PATH:/var/run/docker.sock
             - ./keys/jwt-private-key.pem:/app/jwt-private-key.pem:ro
+            - ./recordings:/app/recordings
         networks:
             - db
             - interview-platform-traefik

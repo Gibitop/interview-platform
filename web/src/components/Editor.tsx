@@ -17,9 +17,9 @@ import { getSingletonHighlighter } from 'shiki/bundle/web';
 import { shikiToMonaco } from '@shikijs/monaco';
 
 import reactDtsUrl from '~/../public/react.d.ts.txt';
-import { useRoomStore } from '~/stores/room';
 import { FilePicker } from './FilePicker';
 import debounce from 'lodash/debounce';
+import { Role } from '~insider/types/users';
 
 // Don't use CDN
 self.MonacoEnvironment = {
@@ -95,10 +95,13 @@ monaco.languages.registerDocumentFormattingEditProvider(
     monacoPrettier,
 );
 
-export const Editor = () => {
+export type EditorProps = {
+    role: Role;
+};
+
+export const Editor = ({ role }: EditorProps) => {
     const [monacoEditor, setMonacoEditor] = useState<editor.IStandaloneCodeEditor | null>(null);
 
-    const isSpectator = useRoomStore(data => data?.role === 'host' && data.isSpectator);
     const roomContext = useRoomContext();
     const changeMyUser = roomContext?.changeMyUser;
 
@@ -232,10 +235,10 @@ export const Editor = () => {
     useEffect(() => {
         if (!monacoEditor) return;
         monacoEditor.updateOptions({
-            readOnly: isSpectator,
+            readOnly: role === 'spectator' || role === 'recorder',
             readOnlyMessage: { value: "Can't edit code as a spectator" },
         });
-    }, [isSpectator, monacoEditor]);
+    }, [role, monacoEditor]);
 
     // Other users cursors style
     const styleSheet = useMemo(() => {
@@ -271,18 +274,20 @@ export const Editor = () => {
     return (
         <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
-            <div className="px-3 py-2 flex justify-between">
+            <div className="px-3 py-2 flex justify-between min-h-10">
                 <FilePicker />
                 <div className="flex gap-2">
-                    <Button
-                        size="xs"
-                        variant="secondary"
-                        onClick={() =>
-                            monacoEditor?.getAction('editor.action.formatDocument')?.run()
-                        }
-                    >
-                        Format
-                    </Button>
+                    {role !== 'recorder' && (
+                        <Button
+                            size="xs"
+                            variant="secondary"
+                            onClick={() =>
+                                monacoEditor?.getAction('editor.action.formatDocument')?.run()
+                            }
+                        >
+                            Format
+                        </Button>
+                    )}
                 </div>
             </div>
             <div className="flex-1" onContextMenu={e => e.preventDefault()}>

@@ -3,12 +3,14 @@ import { trpc } from '~/lib/trpc';
 import { Button } from './ui/button';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Skeleton } from './ui/skeleton';
+import { cn } from '~/utils/shadcn';
 
 type TProfileButtonProps = {
     withName?: boolean;
+    fullWidth?: boolean;
 };
 
-export const ProfileButton = ({ withName }: TProfileButtonProps) => {
+export const ProfileButton = ({ withName, fullWidth }: TProfileButtonProps) => {
     const navigate = useNavigate();
 
     const { data, error, isLoading } = trpc.auth.getSelf.useQuery(undefined, { retry: 0 });
@@ -43,7 +45,7 @@ export const ProfileButton = ({ withName }: TProfileButtonProps) => {
 
     if (data) {
         return (
-            <div className="flex items-center gap-2">
+            <div className={cn('flex justify-between items-center gap-2', fullWidth && 'w-full')}>
                 {withName && <span>{data.name}</span>}
                 <Button
                     variant="ghost"

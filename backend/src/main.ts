@@ -4,10 +4,16 @@ import fastifyCookie from '@fastify/cookie';
 import { createContext } from './trpc/context';
 import { appRouter, type AppRouter } from './trpc/router';
 import './common/env.js';
-import { getActiveRoomIds, ping } from './common/dockerode';
+import { getActiveRoomIds, ping } from './common/roomContainers';
 import { stopOvertimeRooms } from './jobs/stop-overtime-rooms';
+import { existsSync, mkdirSync } from 'fs';
+import { env } from './common/env.js';
 
 await ping();
+
+if (!existsSync(env.RECORDINGS_DIR)) {
+    mkdirSync(env.RECORDINGS_DIR);
+}
 
 const server = fastify({
     maxParamLength: 5000,

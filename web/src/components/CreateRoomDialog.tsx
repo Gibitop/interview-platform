@@ -11,18 +11,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Button } from './ui/button';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import type { ROOM_TYPES as roomTypesArray } from '~backend/common/roomTypes';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
+import { ROOM_TYPE_NAMES, ROOM_TYPES } from '~/consts/roomTypes';
 
 export type TCreateRoomDialogProps = {
     children: React.ReactNode;
 };
-
-const ROOM_TYPES: typeof roomTypesArray = ['node'];
 
 const formSchema = z.object({
     name: z.string().min(1),
@@ -35,7 +34,7 @@ export const CreateRoomDialog: React.FC<TCreateRoomDialogProps> = ({ children })
     const trpcUtils = trpc.useUtils();
     const { mutate: createRoom, isPending } = trpc.rooms.create.useMutation({
         onSuccess: () => {
-            trpcUtils.rooms.getMy.invalidate();
+            trpcUtils.rooms.getMyRooms.invalidate();
             setIsOpen(false);
             toast.success('Room created');
         },
@@ -67,7 +66,7 @@ export const CreateRoomDialog: React.FC<TCreateRoomDialogProps> = ({ children })
                                     <FormItem>
                                         <FormLabel>Room name</FormLabel>
                                         <FormControl>
-                                            <Input {...field} />
+                                            <Input {...field} placeholder="John Doe" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -91,7 +90,7 @@ export const CreateRoomDialog: React.FC<TCreateRoomDialogProps> = ({ children })
                                                 <SelectContent>
                                                     {ROOM_TYPES.map(type => (
                                                         <SelectItem key={type} value={type}>
-                                                            {type}
+                                                            {ROOM_TYPE_NAMES[type]}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

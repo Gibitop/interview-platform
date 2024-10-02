@@ -1,0 +1,1 @@
+ALTER TABLE "rooms" ADD COLUMN "recording_path" text;

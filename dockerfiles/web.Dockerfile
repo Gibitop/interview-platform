@@ -1,15 +1,23 @@
 FROM node:22.9-alpine3.20
 
 WORKDIR /app/backend
-COPY backend .
+COPY backend/package.json ./package.json
+COPY backend/package-lock.json ./package-lock.json
 RUN npm install
 
 WORKDIR /app/insider
 COPY insider .
 
 WORKDIR /app/web
-COPY web .
+COPY web/package.json ./package.json
+COPY web/package-lock.json ./package-lock.json
 RUN npm install
+
+WORKDIR /app/backend
+COPY backend .
+
+WORKDIR /app/web
+COPY web .
 RUN npm run build
 
 

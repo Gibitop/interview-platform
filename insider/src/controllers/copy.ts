@@ -7,7 +7,7 @@ export const setup = (io: Server) => {
         const candidateCopyListener = () => {
             if (getUser(socket.id)?.role !== 'candidate') return;
 
-            broadcastToRoles(io, 'candidate-copied' satisfies S2CEvent, socket.id, ['host', 'spectator']);
+            broadcastToRoles(io, 'candidate-copied' satisfies S2CEvent, socket.id, ['host', 'spectator', 'recorder']);
         };
         socket.on('copy' satisfies C2SEvent, candidateCopyListener);
 

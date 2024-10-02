@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { implement } from "../utils/implementWithZod";
 
-export type Role = 'host' | 'candidate' | 'spectator';
+export type Role = 'host' | 'candidate' | 'spectator' | 'recorder';
 
 export type User = {
     id: string;

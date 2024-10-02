@@ -1,20 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { z } from 'zod';
-import { Editor } from '~/components/Editor';
-import { Participants } from '~/components/Participants';
-import { Terminal } from '~/components/Terminal';
-import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { Logo } from '~/components/Logo';
-import { ProfileButton } from '~/components/ProfileButton';
 import { trpc } from '~/lib/trpc';
 import { JoinRoomScreen } from '~/components/JoinRoomScreen';
-import { ArrowLeft } from 'lucide-react';
 import { humanIdToUuid } from '~/utils/uuid';
 import { useRoomStore } from '~/stores/room';
-import { Button } from '~/components/ui/button';
-import { Link } from '@tanstack/react-router';
-import { RoomProvider } from '~/components/contexts/useRoomContext';
+import { RoomProvider } from '~/components/contexts/useRoomContext/RoomProvider';
+import { RoomLayout } from '~/components/RoomLayout';
 
 const roomParamsSchema = z.object({
     roomId: z.string().min(1),
@@ -47,40 +39,16 @@ const Room = () => {
     }
 
     return (
-        <RoomProvider>
-            <main className="h-screen flex flex-col">
-                <div className="flex justify-between border-b dark:border-neutral-800 px-3 py-2">
-                    {roomStore.role === 'host' && roomHostInfo ? (
-                        <div className="flex items-center gap-2">
-                            <Button size="xs" variant="ghost" className="aspect-square p-1" asChild>
-                                <Link to="/rooms">
-                                    <ArrowLeft />
-                                </Link>
-                            </Button>
-                            <span>
-                                Room "<span className="font-semibold">{roomHostInfo.name}</span>"
-                            </span>
-                        </div>
-                    ) : (
-                        <Logo isSmall isLink />
-                    )}
-                    <div className="flex gap-3 items-center">
-                        <Participants />
-                        <ProfileButton />
-                    </div>
-                </div>
-                <div className="flex-1">
-                    <ResizablePanelGroup direction="horizontal">
-                        <ResizablePanel>
-                            <Editor />
-                        </ResizablePanel>
-                        <div className="flex flex-col">
-                            <Terminal />
-                        </div>
-                    </ResizablePanelGroup>
-                </div>
-            </main>
-        </RoomProvider>
+        <main className="h-screen flex flex-col">
+            <RoomProvider>
+                <RoomLayout
+                    role={roomStore.role}
+                    roomInfo={roomHostInfo}
+                    roomNamePrefix="Room"
+                    backLink="/rooms"
+                />
+            </RoomProvider>
+        </main>
     );
 };
 

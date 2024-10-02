@@ -1,6 +1,6 @@
 {
     "name": "backend",
-    "version": "1.0.0",
+    "version": "2.1.0",
     "license": "MIT",
     "type": "module",
     "scripts": {
@@ -8,9 +8,10 @@
         "check-types": "tsc --noEmit",
         "build": "rm -rf ./dist/* && swc ./src/* -d ./dist --config-file .swcrc --strip-leading-paths && fix-esm-import-path ./dist",
         "start": "node dist/main.js",
+        "drizzle-up": "drizzle-kit up",
         "drizzle-push": "drizzle-kit push",
         "drizzle-generate": "drizzle-kit generate",
-        "drizzle-migrate": "node tools/migrate.js",
+        "drizzle-migrate": "tsx tools/migrate.js",
         "drizzle-studio": "drizzle-kit studio"
     },
     "dependencies": {

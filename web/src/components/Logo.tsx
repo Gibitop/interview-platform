@@ -23,7 +23,7 @@ export const Logo = ({ isSmall, isLink, isCentered, className, to }: TLogoProps)
     return (
         <h1
             className={cn(
-                'font-semibold',
+                'font-semibold select-none',
                 isSmall && 'text-lg leading-6',
                 !isSmall && 'text-3xl',
                 isCentered && 'w-full text-center',

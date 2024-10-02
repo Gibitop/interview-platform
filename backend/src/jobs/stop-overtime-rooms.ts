@@ -1,8 +1,9 @@
 import { schedule } from 'node-cron';
-import { deleteContainer, getActiveRoomIds } from '../common/dockerode';
+import { deleteContainer, getActiveRoomIds } from '../common/roomContainers';
 import { db } from '../db';
 import { roomsTable } from '../db/tables/roomsTable';
 import { and, lte, inArray } from 'drizzle-orm';
+import { saveRecording } from '../common/recordings';
 
 export const stopOvertimeRooms = schedule('0 * * * *', async () => {
     const activeRoomIds = await getActiveRoomIds();
@@ -15,5 +16,9 @@ export const stopOvertimeRooms = schedule('0 * * * *', async () => {
                 lte(roomsTable.createdAt, new Date(Date.now() - 24 * 60 * 60 * 1000))
             )
         )
-    rooms.forEach(room => deleteContainer(room.id));
+
+    rooms.forEach(async (room) => {
+        await saveRecording(room.id);
+        deleteContainer(room.id)
+    });
 }, { scheduled: false });

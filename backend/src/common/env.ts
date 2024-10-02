@@ -30,7 +30,8 @@ export const env = createEnv({
 
         INSIDER_JWT_PUBLIC_KEY_PATH: z.string().min(1),
         INSIDER_ADDITIONAL_LABELS: z.string().optional(),
-        INSIDER_WS_PORT: z.string()
+        INSIDER_WS_PORT: z
+            .string()
             .default('5050')
             .transform((value, ctx) => {
                 const parsed = Number(value);
@@ -55,6 +56,8 @@ export const env = createEnv({
 
                 return parsed;
             }),
+
+        RECORDINGS_DIR: z.string().min(1),
     },
 
     runtimeEnv: process.env,

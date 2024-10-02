@@ -7,7 +7,7 @@ import { config } from 'dotenv';
 
 config();
 
-const env = createEnv({
+export const env = createEnv({
     server: {
         DATABASE_URL: z.string().url(),
     },

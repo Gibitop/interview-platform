@@ -40,6 +40,7 @@ export const setup = (io: Server) => {
         const patchActiveFileContentListener = (data: unknown) => {
             if (!(data instanceof Uint8Array)) return;
             if (getUser(socket.id)?.role === 'spectator') return;
+            if (getUser(socket.id)?.role === 'recorder') return;
 
             try {
                 applyBinaryPatch(data);

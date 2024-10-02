@@ -62,7 +62,7 @@ export const Terminal = () => {
                     )}
                 </div>
             </div>
-            <div className="h-full">
+            <div className="h-full bg-[#1e1e1e]">
                 {/* 740px = 80 terminal columns (chars) */}
                 <div className="h-full w-[740px]" ref={elRef} />
             </div>

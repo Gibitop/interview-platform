@@ -1,12 +1,10 @@
 import { Model, Patch, StrApi, StrNode } from 'json-joy/lib/json-crdt';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
-import { useRoomStore } from '~/stores/room';
 import type { C2SEvent, S2CEvent } from '~insider/eventNames';
+import type { Role } from '~insider/types/users';
 
-export const useActiveFileContent = (socket: Socket | null) => {
-    const roomStore = useRoomStore();
-
+export const useActiveFileContent = (socket: Socket | null, role?: Role) => {
     const activeFileRef = useRef<Model<StrNode<string>> | null>(null);
 
     const getActiveFileContent = useCallback(
@@ -19,11 +17,10 @@ export const useActiveFileContent = (socket: Socket | null) => {
         [getActiveFileContent],
     );
 
-    const isSpectator = (roomStore?.role === 'candidate' ? false : roomStore?.isSpectator) ?? false;
     const updateActiveFileContent = useCallback(
         (cb: (ins: StrApi['ins'], del: StrApi['del']) => void) => {
             if (!activeFileRef.current || !socket || !socket.connected) return;
-            if (roomStore?.role === 'host' && isSpectator) return;
+            if (role === 'spectator' || role === 'recorder') return;
 
             const str = activeFileRef.current.api.str('');
             cb(str.ins.bind(str), str.del.bind(str));
@@ -32,7 +29,7 @@ export const useActiveFileContent = (socket: Socket | null) => {
             refreshActiveFileContent();
             socket.emit('patch-active-file-content' satisfies C2SEvent, patch.toBinary());
         },
-        [socket, roomStore?.role, isSpectator, refreshActiveFileContent],
+        [socket, role, refreshActiveFileContent],
     );
 
     useEffect(() => {
@@ -68,5 +65,10 @@ export const useActiveFileContent = (socket: Socket | null) => {
         };
     }, [getActiveFileContent, refreshActiveFileContent, socket]);
 
-    return { getActiveFileContent, updateActiveFileContent, activeFileContent };
+    const resetState = useCallback(() => {
+        activeFileRef.current = null;
+        setActiveFileContent('');
+    }, []);
+
+    return { getActiveFileContent, updateActiveFileContent, activeFileContent, resetState };
 };

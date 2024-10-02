@@ -36,3 +36,5 @@ dist-ssr
 jwt-private-key.pem
 
 *.env
+
+recordings/

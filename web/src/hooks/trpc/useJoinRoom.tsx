@@ -7,7 +7,7 @@ export const useJoinRoom = (options?: Parameters<typeof trpc.rooms.join.useMutat
         ...options,
         onSuccess: (...args) => {
             options?.onSuccess?.(...args);
-            trpcUtils.rooms.getMy.invalidate();
+            trpcUtils.rooms.getMyRooms.invalidate();
         },
     });
 };

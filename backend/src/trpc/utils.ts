@@ -1,6 +1,6 @@
-import SuperJSON from 'superjson';
 import { initTRPC, TRPCError } from '@trpc/server';
 import { createContext } from './context';
+import SuperJSON from '../common/super-json';
 import { lucia } from '../common/lucia';
 
 export const t = initTRPC.context<typeof createContext>().create({

@@ -44,5 +44,10 @@ export const useActiveFilePath = (socket: Socket | null) => {
         };
     }, [socket]);
 
-    return { activeFilePath, availableFiles, changeActiveFilePath };
+    const resetState = useCallback(() => {
+        setActiveFilePath('');
+        setAvailableFiles([]);
+    }, []);
+
+    return { activeFilePath, availableFiles, changeActiveFilePath, resetState };
 };

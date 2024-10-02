@@ -39,6 +39,7 @@ const RoleIconMap: Record<Role, React.JSX.ElementType> = {
             )}
         />
     ),
+    recorder: () => null,
 };
 
 export const Participants = () => {

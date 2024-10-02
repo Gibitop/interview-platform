@@ -1,9 +1,7 @@
 import type { Server, Socket } from 'socket.io';
 import type { C2SEvent, S2CEvent } from '../eventNames';
-import jwt from 'jsonwebtoken';
-import { readFile } from 'fs/promises';
 import { zChangeMyUserRequest, type Role, type User } from '../types/users';
-
+import { validateBackendJwt } from '../utils/validateHostJwt';
 
 const users = new Map<string, User>();
 const hostIds = new Set<string>();
@@ -27,7 +25,7 @@ export const broadcastToRoles = (
     io: Server,
     event: S2CEvent,
     data: unknown,
-    roles: Role[] = ['candidate', 'host', 'spectator'],
+    roles: Role[] = ['candidate', 'host', 'spectator', 'recorder'],
 ) => {
     for (const [id, user] of users) {
         if (roles.includes(user.role)) {
@@ -37,8 +35,8 @@ export const broadcastToRoles = (
 };
 
 const broadcastUsers = (io: Server) => {
-    const userForHosts = [...users.values()];
-    broadcastToRoles(io, 'users-changed' satisfies S2CEvent, userForHosts, ['host', 'spectator']);
+    const userForHosts = [...users.values()].filter(({ role }) => role !== 'recorder');
+    broadcastToRoles(io, 'users-changed' satisfies S2CEvent, userForHosts, ['host', 'spectator', 'recorder']);
 
     const userForCandidates: User[] = userForHosts
         .filter(({ role }) => role !== 'spectator')
@@ -48,23 +46,6 @@ const broadcastUsers = (io: Server) => {
         }));
     broadcastToRoles(io, 'users-changed' satisfies S2CEvent, userForCandidates, ['candidate']);
 };
-
-const validateHostJwt = async (token: string): Promise<boolean> => {
-    try {
-        const parsed: (jwt.JwtPayload & { roomId?: string }) | string = jwt.verify(
-            token,
-            await readFile('./jwt-public-key.pem', 'utf-8'),
-            { algorithms: ['RS256'] }
-        );
-        if (typeof parsed !== 'object') return false;
-
-        // Maybe add roomId validation
-
-        return true
-    } catch(e) {
-        return false;
-    }
-}
 
 export const setup = (io: Server) => {
     const connectionListener = async (socket: Socket) => {
@@ -82,14 +63,18 @@ export const setup = (io: Server) => {
             color: selectColor(),
         };
 
-        if (await validateHostJwt(socket.handshake.auth.token)) {
+        if (await validateBackendJwt(socket.handshake.auth.token)) {
             hostIds.add(socket.id);
             if (socket.handshake.auth.spectatorMode) {
                 user.role = 'spectator';
             } else {
                 user.role = 'host';
             }
+        } else if (socket.handshake.auth.recorderMode && socket.client.conn.remoteAddress === '127.0.0.1') {
+            hostIds.add(socket.id);
+            user.role = 'recorder';
         }
+
 
         users.set(socket.id, user);
 
