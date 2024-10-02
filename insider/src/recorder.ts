@@ -2,8 +2,11 @@ import { io } from 'socket.io-client';
 import SuperJSON from './utils/super-json';
 import type { C2SEvent, S2CEvent } from './eventNames';
 import type { RecordedEvent, Recording } from './types/recording';
-import { version } from '../package.json';
 import { env } from './env';
+import { readFileSync } from 'fs';
+import type packageJson from '../package.json';
+
+const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as typeof packageJson;
 
 
 let startTimestampMs = Date.now();
