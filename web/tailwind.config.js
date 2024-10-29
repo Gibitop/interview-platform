@@ -1,5 +1,6 @@
 import tailwindAnimate from 'tailwindcss-animate';
 import tailwindContainerQueries from '@tailwindcss/container-queries';
+import tailwindTypography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -31,5 +32,5 @@ export default {
             },
         },
     },
-    plugins: [tailwindAnimate, tailwindContainerQueries],
+    plugins: [tailwindAnimate, tailwindContainerQueries, tailwindTypography],
 };

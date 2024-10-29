@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SandboxImport } from './routes/sandbox'
 import { Route as RoomsImport } from './routes/rooms'
 import { Route as IndexImport } from './routes/index'
 import { Route as RecordingsIndexImport } from './routes/recordings/index'
@@ -19,6 +20,11 @@ import { Route as RecordingsFromFileImport } from './routes/recordings/from-file
 import { Route as RecordingsRecordingIdImport } from './routes/recordings/$recordingId'
 
 // Create/Update Routes
+
+const SandboxRoute = SandboxImport.update({
+  path: '/sandbox',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const RoomsRoute = RoomsImport.update({
   path: '/rooms',
@@ -68,6 +74,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoomsImport
       parentRoute: typeof rootRoute
     }
+    '/sandbox': {
+      id: '/sandbox'
+      path: '/sandbox'
+      fullPath: '/sandbox'
+      preLoaderRoute: typeof SandboxImport
+      parentRoute: typeof rootRoute
+    }
     '/recordings/$recordingId': {
       id: '/recordings/$recordingId'
       path: '/recordings/$recordingId'
@@ -104,6 +117,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/rooms': typeof RoomsRoute
+  '/sandbox': typeof SandboxRoute
   '/recordings/$recordingId': typeof RecordingsRecordingIdRoute
   '/recordings/from-file': typeof RecordingsFromFileRoute
   '/rooms/$roomId': typeof RoomsRoomIdRoute
@@ -113,6 +127,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/rooms': typeof RoomsRoute
+  '/sandbox': typeof SandboxRoute
   '/recordings/$recordingId': typeof RecordingsRecordingIdRoute
   '/recordings/from-file': typeof RecordingsFromFileRoute
   '/rooms/$roomId': typeof RoomsRoomIdRoute
@@ -123,6 +138,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/rooms': typeof RoomsRoute
+  '/sandbox': typeof SandboxRoute
   '/recordings/$recordingId': typeof RecordingsRecordingIdRoute
   '/recordings/from-file': typeof RecordingsFromFileRoute
   '/rooms/$roomId': typeof RoomsRoomIdRoute
@@ -134,6 +150,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/rooms'
+    | '/sandbox'
     | '/recordings/$recordingId'
     | '/recordings/from-file'
     | '/rooms/$roomId'
@@ -142,6 +159,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/rooms'
+    | '/sandbox'
     | '/recordings/$recordingId'
     | '/recordings/from-file'
     | '/rooms/$roomId'
@@ -150,6 +168,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/rooms'
+    | '/sandbox'
     | '/recordings/$recordingId'
     | '/recordings/from-file'
     | '/rooms/$roomId'
@@ -160,6 +179,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RoomsRoute: typeof RoomsRoute
+  SandboxRoute: typeof SandboxRoute
   RecordingsRecordingIdRoute: typeof RecordingsRecordingIdRoute
   RecordingsFromFileRoute: typeof RecordingsFromFileRoute
   RoomsRoomIdRoute: typeof RoomsRoomIdRoute
@@ -169,6 +189,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RoomsRoute: RoomsRoute,
+  SandboxRoute: SandboxRoute,
   RecordingsRecordingIdRoute: RecordingsRecordingIdRoute,
   RecordingsFromFileRoute: RecordingsFromFileRoute,
   RoomsRoomIdRoute: RoomsRoomIdRoute,
@@ -189,6 +210,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/rooms",
+        "/sandbox",
         "/recordings/$recordingId",
         "/recordings/from-file",
         "/rooms/$roomId",
@@ -200,6 +222,9 @@ export const routeTree = rootRoute
     },
     "/rooms": {
       "filePath": "rooms.tsx"
+    },
+    "/sandbox": {
+      "filePath": "sandbox.tsx"
     },
     "/recordings/$recordingId": {
       "filePath": "recordings/$recordingId.tsx"

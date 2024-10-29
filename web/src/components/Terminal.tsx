@@ -48,7 +48,7 @@ export const Terminal = () => {
                 className="hidden"
                 onChange={handleUpload}
             />
-            <div className="px-3 py-2 flex justify-between">
+            <div className="px-3 py-2 flex justify-between min-h-11 ">
                 {isHost ? 'Terminal (read-write)' : 'Terminal (read-only)'}
                 <div className="flex gap-3">
                     {isHost && (

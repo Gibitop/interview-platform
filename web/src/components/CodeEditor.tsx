@@ -99,7 +99,7 @@ export type EditorProps = {
     role: Role;
 };
 
-export const Editor = ({ role }: EditorProps) => {
+export const CodeEditor = ({ role }: EditorProps) => {
     const [monacoEditor, setMonacoEditor] = useState<editor.IStandaloneCodeEditor | null>(null);
 
     const roomContext = useRoomContext();
@@ -274,7 +274,7 @@ export const Editor = ({ role }: EditorProps) => {
     return (
         <div className="flex flex-col h-full">
             <style dangerouslySetInnerHTML={styleSheet} />
-            <div className="px-3 py-2 flex justify-between min-h-10">
+            <div className="px-3 py-2 flex justify-between min-h-11">
                 <FilePicker />
                 <div className="flex gap-2">
                     {role !== 'recorder' && (

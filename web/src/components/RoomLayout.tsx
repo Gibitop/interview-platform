@@ -6,11 +6,13 @@ import { Logo } from './Logo';
 import { Participants } from './Participants';
 import { ProfileButton } from './ProfileButton';
 import { ResizablePanel, ResizablePanelGroup } from './ui/resizable';
-import { Editor } from './Editor';
+import { CodeEditor } from './CodeEditor';
 import { Terminal } from './Terminal';
 import { AppRouter } from '~backend/trpc/router';
 import { dateFormatter } from '~/consts/dateFormatter';
 import { ROOM_TYPE_NAMES } from '~/consts/roomTypes';
+import { NotesEditor } from './NotesEditor';
+import { PanelResizeHandle } from 'react-resizable-panels';
 
 export type RoomLayoutProps = {
     role: Role;
@@ -52,15 +54,23 @@ export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLay
                     <ProfileButton />
                 </div>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 flex overflow-hidden">
                 <ResizablePanelGroup direction="horizontal">
+                    {role !== 'candidate' && (
+                        <>
+                            <ResizablePanel className="border-r border-r-neutral-800">
+                                <NotesEditor />
+                            </ResizablePanel>
+                            <PanelResizeHandle />
+                        </>
+                    )}
                     <ResizablePanel>
-                        <Editor role={role} />
+                        <CodeEditor role={role} />
                     </ResizablePanel>
-                    <div className="flex flex-col border-l border-l-neutral-800">
-                        <Terminal />
-                    </div>
                 </ResizablePanelGroup>
+                {/* <div className="flex flex-col border-l border-l-neutral-800">
+                    <Terminal />
+                </div> */}
             </div>
         </>
     );

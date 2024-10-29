@@ -27,6 +27,9 @@
         "@tanstack/react-query": "5.56.2",
         "@tanstack/react-router": "1.58.3",
         "@tanstack/react-table": "8.20.5",
+        "@tiptap/pm": "^2.8.0",
+        "@tiptap/react": "^2.8.0",
+        "@tiptap/starter-kit": "^2.8.0",
         "@trpc/client": "11.0.0-rc.544",
         "@trpc/react-query": "11.0.0-rc.544",
         "@xterm/addon-fit": "0.10.0",
@@ -54,6 +57,7 @@
         "zustand": "4.5.5"
     },
     "devDependencies": {
+        "@tailwindcss/typography": "^0.5.15",
         "@tanstack/router-devtools": "1.58.3",
         "@tanstack/router-vite-plugin": "1.58.4",
         "@total-typescript/ts-reset": "0.6.1",

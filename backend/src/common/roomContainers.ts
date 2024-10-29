@@ -95,5 +95,5 @@ export const sendRequestToContainer = async (
     path: string,
     requestInit?: RequestInit,
     // TODO: Think of a better way to run this locally without docker
-) => fetch(`http://${makeContainerName(roomId)}:${env.INSIDER_WS_PORT}/${path}`, requestInit);
-// ) => fetch(`http://localhost:${env.INSIDER_WS_PORT}/${path}`, requestInit);
+// ) => fetch(`http://${makeContainerName(roomId)}:${env.INSIDER_WS_PORT}/${path}`, requestInit);
+) => fetch(`http://localhost:${env.INSIDER_WS_PORT}/${path}`, requestInit);

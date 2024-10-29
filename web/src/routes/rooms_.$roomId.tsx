@@ -39,7 +39,7 @@ const Room = () => {
     }
 
     return (
-        <main className="h-screen flex flex-col">
+        <main className="h-screen flex flex-col overflow-hidden">
             <RoomProvider>
                 <RoomLayout
                     role={roomStore.role}
