@@ -3,26 +3,54 @@ import SuperJSON from './utils/super-json';
 import type { C2SEvent, S2CEvent } from './eventNames';
 import type { RecordedEvent, Recording } from './types/recording';
 import { env } from './env';
-import { readFileSync } from 'fs';
+import { existsSync, openSync, readFileSync } from 'fs';
 import type packageJson from '../package.json';
+import { appendFile } from 'fs/promises';
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as typeof packageJson;
+
+const RECORDING_RECOVERY_PATH = `${env.PERSISTENCE_DIRECTORY_PATH}/recording-recovery`;
 
 
 let startTimestampMs = Date.now();
 let recording: RecordedEvent[] = [];
 
-export const startRecording = () => {
-    startTimestampMs = Date.now();
-    recording = [];
+if (existsSync(RECORDING_RECOVERY_PATH)) {
+    const text = readFileSync(RECORDING_RECOVERY_PATH, 'utf-8');
+    let lastEvent: RecordedEvent | null = null;
+    for (const line of text.split('\n')) {
+        if (!line) {
+            continue;
+        }
 
+        const event = SuperJSON.parse(line) as RecordedEvent;
+        lastEvent = event;
+
+        recording.push(event);
+    }
+
+    if (lastEvent) {
+        startTimestampMs = Date.now() - lastEvent.timestampMs;
+    }
+
+    console.log(`Recovered ${recording.length} events from ${RECORDING_RECOVERY_PATH}`);
+}
+
+export const startRecording = () => {
     const socket = io(`ws://127.0.0.1:5050`, {
         auth: { recorderMode: true },
     });
 
-    const listener = (event: S2CEvent, ...args: unknown[]) => {
+    const listener = async (event: S2CEvent, ...args: unknown[]) => {
+        const timestampMs = Date.now() - startTimestampMs;
+
+        await appendFile(
+            RECORDING_RECOVERY_PATH,
+            SuperJSON.stringify({ event, args, timestampMs } satisfies RecordedEvent) + '\n'
+        );
+
         recording.push({
-            timestampMs: Date.now() - startTimestampMs,
+            timestampMs,
             event,
             args: args.map(arg => arg instanceof Buffer ? Uint8Array.from(arg) : arg),
         });

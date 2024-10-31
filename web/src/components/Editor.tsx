@@ -97,9 +97,10 @@ monaco.languages.registerDocumentFormattingEditProvider(
 
 export type EditorProps = {
     role: Role;
+    usernameCursorsVisible: boolean;
 };
 
-export const Editor = ({ role }: EditorProps) => {
+export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
     const [monacoEditor, setMonacoEditor] = useState<editor.IStandaloneCodeEditor | null>(null);
 
     const roomContext = useRoomContext();
@@ -247,17 +248,21 @@ export const Editor = ({ role }: EditorProps) => {
         for (const { id, name, color } of roomContext?.users ?? []) {
             cursorStyles += `
                 .yRemoteSelection-${id},
-                .yRemoteSelectionHead-${id}  {
+                .yRemoteSelectionHead-${id} {
                     --user-color: ${color};
                 }
-                .yRemoteSelectionHead-${id}::after {
-                    content: "${name}";
-                }
             `;
+            if (usernameCursorsVisible) {
+                cursorStyles += `
+                    .yRemoteSelectionHead-${id}::after {
+                        content: "${name}";
+                    }
+                `;
+            }
         }
 
         return { __html: cursorStyles };
-    }, [roomContext?.users]);
+    }, [roomContext?.users, usernameCursorsVisible]);
 
     // Hack to keep the cursor position from jumping to the end of the file when other users edit the file
     useEffect(() => {

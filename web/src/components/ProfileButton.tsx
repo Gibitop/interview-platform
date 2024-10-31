@@ -35,7 +35,7 @@ export const ProfileButton = ({ withName, fullWidth }: TProfileButtonProps) => {
 
     if (error) {
         return (
-            <Button variant="ghost" size="xs" className="aspect-square p-1" asChild>
+            <Button variant="ghost" size="icon-sm" className="aspect-square p-1" asChild>
                 <Link to="/rooms">
                     <LogIn />
                 </Link>
@@ -49,11 +49,11 @@ export const ProfileButton = ({ withName, fullWidth }: TProfileButtonProps) => {
                 {withName && <span>{data.name}</span>}
                 <Button
                     variant="ghost"
-                    size="xs"
+                    size="icon-sm"
                     className="aspect-square p-1"
                     onClick={() => logout()}
                 >
-                    <LogOut />
+                    <LogOut size={20} />
                 </Button>
             </div>
         );

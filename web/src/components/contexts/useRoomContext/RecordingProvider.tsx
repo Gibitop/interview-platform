@@ -31,7 +31,7 @@ export const RecordingProvider = ({ children, recording }: TRecordingContextProv
         activeFileContent,
         getActiveFileContent,
         resetState: resetActiveFileContent,
-    } = useActiveFileContent(mockSocket);
+    } = useActiveFileContent(mockSocket, activeFilePath);
 
     const {
         addTerminalOutputListener,

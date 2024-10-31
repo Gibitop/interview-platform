@@ -9,6 +9,10 @@ export const env = createEnv({
         /** Set to `true` when using HTTPS */
         NODE_ENV: z.enum(['development', 'production']),
 
+        USE_LOCALHOST_INSIDER: z
+            .enum(['true', 'false'])
+            .transform((value) => value === 'true'),
+
         DATABASE_URL: z.string().url(),
 
         DOMAIN: z.string().min(1),
@@ -28,6 +32,9 @@ export const env = createEnv({
             .regex(/^(true|false)$/)
             .pipe(z.preprocess((value: unknown) => value === 'true', z.boolean())),
 
+        INSIDER_WORKING_DIRECTORY: z.string().min(1),
+        INSIDER_START_ACTIVE_FILE_NAME: z.string().min(1),
+        INSIDER_PERSISTENCE_DIRECTORY_PATH: z.string().min(1),
         INSIDER_JWT_PUBLIC_KEY_PATH: z.string().min(1),
         INSIDER_ADDITIONAL_LABELS: z.string().optional(),
         INSIDER_WS_PORT: z

@@ -62,6 +62,7 @@ const fsUpdateListeners = new Set<() => void>([]);
 
 
 export const getFullActiveFilePath = () => fullActiveFilePath;
+export const getRelativeActiveFilePath = () => relativeActiveFilePath;
 
 export const setup = (io: Server) => {
     const connectionListener = (socket: Socket) => {

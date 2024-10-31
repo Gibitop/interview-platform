@@ -47,7 +47,7 @@ export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
 
     const { activeFilePath, availableFiles, changeActiveFilePath } = useActiveFilePath(socket);
     const { activeFileContent, getActiveFileContent, updateActiveFileContent } =
-        useActiveFileContent(socket, roomStore?.role);
+        useActiveFileContent(socket, activeFilePath, roomStore?.role);
 
     const { reportCopy } = useCandidateCopy(socket, users, roomStore?.role);
 
