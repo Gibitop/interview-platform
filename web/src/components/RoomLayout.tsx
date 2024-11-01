@@ -32,9 +32,9 @@ export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLay
             <div className="flex justify-between items-center border-b dark:border-neutral-800 px-3 py-2 min-h-11">
                 {role !== 'spectator' && roomInfo ? (
                     <div className="flex items-center gap-2">
-                        <Button size="icon-sm" variant="ghost" asChild>
+                        <Button size="xs" variant="ghost" className="aspect-square p-1" asChild>
                             <Link to={backLink}>
-                                <ArrowLeft size={20} />
+                                <ArrowLeft size={16} />
                             </Link>
                         </Button>
                         <span>
