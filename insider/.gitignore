@@ -36,4 +36,4 @@ dist-ssr
 jwt-public-key.pem
 
 wd/
-recording-recovery
+persistence/
