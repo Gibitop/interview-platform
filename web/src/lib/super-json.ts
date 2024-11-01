@@ -3,7 +3,13 @@ import SuperJSON from 'superjson';
 SuperJSON.registerCustom<Uint8Array, string>(
     {
         isApplicable: v => v instanceof Uint8Array,
-        serialize: v => btoa(String.fromCharCode(...v)),
+        serialize: v => {
+            let str = '';
+            for (let i = 0; i < v.byteLength; i++) {
+                str += String.fromCharCode(v[i]!);
+            }
+            return btoa(str);
+        },
         deserialize: v => {
             const binaryString = atob(v);
             const bytes = new Uint8Array(binaryString.length);

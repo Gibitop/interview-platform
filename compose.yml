@@ -34,7 +34,11 @@ services:
             HASHING_SECRET_HEX: $HASHING_SECRET_HEX
             REGISTRATION_OPEN: $REGISTRATION_OPEN
             INSIDER_JWT_PUBLIC_KEY_PATH: $INSIDER_JWT_PUBLIC_KEY_PATH
+            INSIDER_WORKING_DIRECTORY: $INSIDER_WORKING_DIRECTORY
+            INSIDER_START_ACTIVE_FILE_NAME: $INSIDER_START_ACTIVE_FILE_NAME
+            INSIDER_PERSISTENCE_DIRECTORY_PATH: '/persistence'
             RECORDINGS_DIR: './recordings'
+            USE_LOCALHOST_INSIDER: 'false'
         labels:
             - traefik.enable=true
             - traefik.http.routers.backend.rule=(Host(`$DOMAIN`) && PathPrefix(`/api`))

@@ -1,7 +1,7 @@
 import { Role } from '~insider/types/users';
 import { Button } from './ui/button';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Flag, FlagOff } from 'lucide-react';
 import { Logo } from './Logo';
 import { Participants } from './Participants';
 import { ProfileButton } from './ProfileButton';
@@ -11,6 +11,8 @@ import { Terminal } from './Terminal';
 import { AppRouter } from '~backend/trpc/router';
 import { dateFormatter } from '~/consts/dateFormatter';
 import { ROOM_TYPE_NAMES } from '~/consts/roomTypes';
+import { SimpleTooltip } from './simple/SimpleTooltip';
+import { useState } from 'react';
 
 export type RoomLayoutProps = {
     role: Role;
@@ -23,6 +25,8 @@ export type RoomLayoutProps = {
 };
 
 export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLayoutProps) => {
+    const [usernameCursorsVisible, setUsernameCursorsVisible] = useState(true);
+
     return (
         <>
             <div className="flex justify-between items-center border-b dark:border-neutral-800 px-3 py-2 min-h-11">
@@ -30,7 +34,7 @@ export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLay
                     <div className="flex items-center gap-2">
                         <Button size="xs" variant="ghost" className="aspect-square p-1" asChild>
                             <Link to={backLink}>
-                                <ArrowLeft />
+                                <ArrowLeft size={16} />
                             </Link>
                         </Button>
                         <span>
@@ -48,6 +52,22 @@ export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLay
                     <Logo isSmall isLink />
                 )}
                 <div className="flex gap-3 items-center">
+                    <SimpleTooltip
+                        tipContent={
+                            usernameCursorsVisible
+                                ? 'User names on cursors are visible'
+                                : 'User names on cursors are hidden'
+                        }
+                    >
+                        <Button
+                            size="xs"
+                            className="aspect-square p-1"
+                            variant="ghost"
+                            onClick={() => setUsernameCursorsVisible(!usernameCursorsVisible)}
+                        >
+                            {usernameCursorsVisible ? <Flag size={16} /> : <FlagOff size={16} />}
+                        </Button>
+                    </SimpleTooltip>
                     <Participants />
                     <ProfileButton />
                 </div>
@@ -55,7 +75,7 @@ export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLay
             <div className="flex-1">
                 <ResizablePanelGroup direction="horizontal">
                     <ResizablePanel>
-                        <Editor role={role} />
+                        <Editor role={role} usernameCursorsVisible={usernameCursorsVisible} />
                     </ResizablePanel>
                     <div className="flex flex-col border-l border-l-neutral-800">
                         <Terminal />

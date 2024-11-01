@@ -7,3 +7,7 @@ services:
         build:
             context: ./insider
             dockerfile: ../dockerfiles/insider-node.Dockerfile
+            args:
+                PERSISTENCE_DIRECTORY_PATH: $INSIDER_PERSISTENCE_DIRECTORY_PATH
+                WORKING_DIRECTORY: $INSIDER_WORKING_DIRECTORY
+                START_ACTIVE_FILE_NAME: $INSIDER_START_ACTIVE_FILE_NAME

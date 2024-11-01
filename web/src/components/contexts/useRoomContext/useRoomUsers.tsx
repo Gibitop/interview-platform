@@ -38,7 +38,7 @@ export const useRoomUsers = (
                 return newUsers;
             });
         },
-        [socket],
+        [role, socket],
     );
 
     useEffect(() => {
@@ -62,7 +62,7 @@ export const useRoomUsers = (
                         const newUser = newUsers.find(({ id }) => id === user.id);
                         if (newUser && !newUser.isFocused && user.isFocused) {
                             toast(
-                                <span className="flex gap-2 items-center">
+                                <span className="flex flex-wrap gap-2 items-center">
                                     <AlertTriangle size={16} />
                                     Candidate{' '}
                                     <span className="font-semibold" style={{ color: user.color }}>

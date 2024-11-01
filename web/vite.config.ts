@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => {
 
     return {
         plugins: [react(), TanStackRouterVite()],
+        define: {
+            __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+        },
         server: {
             headers: {
                 'Cross-Origin-Embedder-Policy': 'require-corp',
