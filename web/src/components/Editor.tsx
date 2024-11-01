@@ -221,8 +221,6 @@ export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
         const disposable = monacoEditor.onDidChangeModelContent(event => {
             if (roomContext.getActiveFileContent() === monacoEditor.getModel()?.getValue()) return;
 
-            console.log(roomContext.activeFilePath);
-
             roomContext?.updateActiveFileContent((ins, del) => {
                 event.changes
                     .sort((change1, change2) => change2.rangeOffset - change1.rangeOffset)
