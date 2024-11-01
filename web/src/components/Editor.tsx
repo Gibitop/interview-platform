@@ -230,7 +230,7 @@ export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
                     });
             });
         });
-    }, [monacoEditor, roomContext]);
+    }, [monacoEditor, roomContext, roomContext?.updateActiveFileContent]);
 
     // Read-only mode for spectators
     useEffect(() => {
