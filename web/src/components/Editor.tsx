@@ -121,7 +121,11 @@ export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
             });
         }, 20);
 
-        monacoEditor.onDidChangeCursorSelection(debouncedSendCursor);
+        const disposable = monacoEditor.onDidChangeCursorSelection(debouncedSendCursor);
+
+        return () => {
+            disposable.dispose();
+        };
     }, [changeMyUser, monacoEditor]);
 
     // Draw user cursors
@@ -214,8 +218,10 @@ export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
     useEffect(() => {
         if (!monacoEditor || !roomContext) return;
 
-        monacoEditor.onDidChangeModelContent(event => {
+        const disposable = monacoEditor.onDidChangeModelContent(event => {
             if (roomContext.getActiveFileContent() === monacoEditor.getModel()?.getValue()) return;
+
+            console.log(roomContext.activeFilePath);
 
             roomContext?.updateActiveFileContent((ins, del) => {
                 event.changes
@@ -230,7 +236,11 @@ export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
                     });
             });
         });
-    }, [monacoEditor, roomContext, roomContext?.updateActiveFileContent]);
+
+        return () => {
+            disposable.dispose();
+        };
+    }, [monacoEditor, roomContext]);
 
     // Read-only mode for spectators
     useEffect(() => {
