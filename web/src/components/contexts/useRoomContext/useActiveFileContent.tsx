@@ -4,7 +4,11 @@ import { Socket } from 'socket.io-client';
 import type { C2SEvent, S2CEvent } from '~insider/eventNames';
 import type { Role } from '~insider/types/users';
 
-export const useActiveFileContent = (socket: Socket | null, role?: Role) => {
+export const useActiveFileContent = (
+    socket: Socket | null,
+    activeFilePath: string,
+    role?: Role,
+) => {
     const activeFileRef = useRef<Model<StrNode<string>> | null>(null);
 
     const getActiveFileContent = useCallback(
@@ -27,9 +31,13 @@ export const useActiveFileContent = (socket: Socket | null, role?: Role) => {
 
             const patch = activeFileRef.current.api.flush();
             refreshActiveFileContent();
-            socket.emit('patch-active-file-content' satisfies C2SEvent, patch.toBinary());
+            socket.emit(
+                'patch-active-file-content' satisfies C2SEvent,
+                patch.toBinary(),
+                activeFilePath,
+            );
         },
-        [socket, role, refreshActiveFileContent],
+        [socket, role, refreshActiveFileContent, activeFilePath],
     );
 
     useEffect(() => {

@@ -36,3 +36,4 @@ dist-ssr
 jwt-public-key.pem
 
 wd/
+persistence/

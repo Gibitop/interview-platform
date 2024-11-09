@@ -48,12 +48,34 @@ export const createContainer = async ({ createdAt, id, name: roomName, type }: R
         name,
         Tty: true,
         HostConfig: {
+            RestartPolicy: { Name: 'always' },
             NetworkMode: 'interview-platform-traefik',
             Binds: [`${env.INSIDER_JWT_PUBLIC_KEY_PATH}:/app/jwt-public-key.pem:ro`],
+            Mounts: [
+                {
+                    Type: 'volume',
+                    Source: `${name}-persistence`,
+                    Target: env.INSIDER_PERSISTENCE_DIRECTORY_PATH,
+                    ReadOnly: false,
+                },
+                {
+                    Type: 'volume',
+                    Source: `${name}-working-directory`,
+                    Target: env.INSIDER_WORKING_DIRECTORY,
+                    ReadOnly: false,
+                }
+            ],
+        },
+        Volumes: {
+            [env.INSIDER_PERSISTENCE_DIRECTORY_PATH]: {},
+            [env.INSIDER_WORKING_DIRECTORY]: {},
         },
         Env: [
             `NODE_ENV=${env.NODE_ENV}`,
             `ROOM_INFO=${SuperJSON.stringify({ createdAt, id, name: roomName, type } satisfies RoomInfo)}`,
+            `PERSISTENCE_DIRECTORY_PATH=${env.INSIDER_PERSISTENCE_DIRECTORY_PATH}`,
+            `WORKING_DIRECTORY=${env.INSIDER_WORKING_DIRECTORY}`,
+            `START_ACTIVE_FILE_NAME=${env.INSIDER_START_ACTIVE_FILE_NAME}`,
         ],
         Labels: {
             ...additionalLabels,
@@ -70,10 +92,23 @@ export const createContainer = async ({ createdAt, id, name: roomName, type }: R
 };
 
 export const deleteContainer = async (roomId: string) => {
-    await docker
-        .getContainer(makeContainerName(roomId))
-        .stop()
-        .catch(() => { });
+    const container = docker.getContainer(makeContainerName(roomId));
+
+    await container.stop().catch((e) => {
+        console.error(`Failed to stop container ${makeContainerName(roomId)}`, e);
+    });
+
+    await container.remove().catch((e) => {
+        console.error(`Failed to remove container ${makeContainerName(roomId)}`, e);
+    });
+
+    const name = makeContainerName(roomId.replace(/-/g, ''));
+    await Promise.all([
+        docker.getVolume(`${name}-persistence`).remove(),
+        docker.getVolume(`${name}-working-directory`).remove(),
+    ]).catch((e) => {
+        console.error(`Failed to remove volumes for container ${makeContainerName(roomId)}`, e);
+    });
 };
 
 export const getActiveRoomIds = async () => {
@@ -94,6 +129,9 @@ export const sendRequestToContainer = async (
     roomId: string,
     path: string,
     requestInit?: RequestInit,
-    // TODO: Think of a better way to run this locally without docker
-// ) => fetch(`http://${makeContainerName(roomId)}:${env.INSIDER_WS_PORT}/${path}`, requestInit);
-) => fetch(`http://localhost:${env.INSIDER_WS_PORT}/${path}`, requestInit);
+) => fetch(
+    env.USE_LOCALHOST_INSIDER
+        ? `http://localhost:${env.INSIDER_WS_PORT}/${path}`
+        : `http://${makeContainerName(roomId)}:${env.INSIDER_WS_PORT}/${path}`,
+    requestInit,
+);

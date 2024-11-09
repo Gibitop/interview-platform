@@ -1,11 +1,36 @@
+# Notes
+- Notes panel
+- MD support
+- Toolbar
+- Content sync
+- Cursor sync
+- Block drag and drop
+- Recording support
+
+
+# User management
+- Create user
+- List of users
+- Edit user
+- Delete user
+
+
+# Room presets
+- Create a preset (for specific room type)
+- Upload files to preset
+- Add commands on room start
+- View room preset
+- Edit room preset
+- Delete room preset
+- Select room preset, when creating a room
+- Implement room presets in the backend + insider
+
+
 # Later
-- Notes
 - Linting and formatting
-- User management
 - Other languages support
-- ignore files from being available (eg: node_modules/*)
+- Ignore files from being available (eg: node_modules/*)
 - Bundle optimizations
-- Offline recovery
 - Iframe
 - Board
 - Chat

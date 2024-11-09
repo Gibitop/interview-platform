@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { Model, nodes, Patch } from 'json-joy/lib/json-crdt/index.js';
-import { addActiveFileUpdateListener, getFullActiveFilePath, removeActiveFileUpdateListener } from './activeFilePath';
+import { addActiveFileUpdateListener, getFullActiveFilePath, getRelativeActiveFilePath, removeActiveFileUpdateListener } from './activeFilePath';
 import type { Server, Socket } from 'socket.io';
 import type { C2SEvent, S2CEvent } from '../eventNames';
 import debounce from 'lodash/debounce.js';
@@ -37,10 +37,15 @@ export const broadcastActiveFileContentRewrite = (io: Server) => {
 
 export const setup = (io: Server) => {
     const connectionListener = (socket: Socket) => {
-        const patchActiveFileContentListener = (data: unknown) => {
+        const patchActiveFileContentListener = (data: unknown, filename: string) => {
             if (!(data instanceof Uint8Array)) return;
             if (getUser(socket.id)?.role === 'spectator') return;
             if (getUser(socket.id)?.role === 'recorder') return;
+
+            if (filename !== getRelativeActiveFilePath()) {
+                socket.emit('active-file-content-rewritten' satisfies S2CEvent, getBinaryModel());
+                return;
+            }
 
             try {
                 applyBinaryPatch(data);
