@@ -1,4 +1,5 @@
 /*
+    https://github.com/MoltenCoffee/tiptap-unique-id
     Copyright 2023 Thijs-Jan Huisman
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
     The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
@@ -82,11 +83,9 @@ export const uniqueId = Extension.create({
 
                     // get changed ranges based on the old state
                     getChangedRanges(transform).forEach(({ newRange }) => {
-                        // ! Always no new nodes
                         const newNodes = findChildrenInRange(newDoc, newRange, node =>
                             types.includes(node.type.name),
                         );
-                        console.log('%cnewNodes', 'background-color: red;', newNodes);
 
                         const newIds = newNodes
                             .map(({ node }) => node.attrs[attributeName])
