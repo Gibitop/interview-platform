@@ -48,6 +48,7 @@ const format = async (text: string, lang: string) =>
         plugins: [prettierPluginEstree, prettierPluginTypeScript],
     });
 
+// Prettier does not have a built-in parser for all languages, here are some supported extensions
 const extensionToBuiltInParserName: Record<string, BuiltInParserName> = {
     ts: 'typescript',
     tsx: 'typescript',
@@ -89,11 +90,11 @@ const monacoPrettier: monaco.languages.DocumentRangeFormattingEditProvider &
 };
 
 monaco.languages.registerDocumentRangeFormattingEditProvider(
-    ['typescript', 'javascript', 'jsx', 'tsx', 'json', 'java'],
+    ['typescript', 'javascript', 'jsx', 'tsx', 'json'],
     monacoPrettier,
 );
 monaco.languages.registerDocumentFormattingEditProvider(
-    ['typescript', 'javascript', 'jsx', 'tsx', 'json', 'java'],
+    ['typescript', 'javascript', 'jsx', 'tsx', 'json'],
     monacoPrettier,
 );
 
@@ -285,8 +286,9 @@ export const Editor = ({ role, usernameCursorsVisible }: EditorProps) => {
     useEffect(() => {
         if (!monacoEditor) return;
 
-        const value = monacoEditor.getModel()?.getValue() ?? '';
-        monacoEditor.getModel()?.dispose();
+        const model = monacoEditor.getModel();
+        const value = model?.getValue() ?? '';
+        model?.dispose();
 
         setupMonacoModel(monaco, monacoEditor, extension, value);
     }, [extension, monacoEditor]);
