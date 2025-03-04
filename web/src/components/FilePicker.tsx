@@ -8,6 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from './ui/select';
+import { Code2 } from 'lucide-react';
 
 export const FilePicker = () => {
     const roomContext = useRoomContext();
@@ -16,7 +17,11 @@ export const FilePicker = () => {
     if (!roomContext) return;
 
     if (role !== 'host') {
-        return <div>{roomContext.activeFilePath}</div>;
+        return (
+            <span className="flex items-center gap-2">
+                <Code2 size={16} /> {roomContext.activeFilePath}
+            </span>
+        );
     }
 
     return (
@@ -34,7 +39,9 @@ export const FilePicker = () => {
                         file =>
                             file && (
                                 <SelectItem key={file} value={file}>
-                                    {file}
+                                    <span className="flex items-center gap-2">
+                                        <Code2 size={16} /> {file}
+                                    </span>
                                 </SelectItem>
                             ),
                     )}

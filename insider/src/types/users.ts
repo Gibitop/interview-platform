@@ -14,18 +14,42 @@ export type User = {
         endLine: number;
         endChar: number;
     };
+    notes?: {
+        selection: {
+            anchor: {
+                path: string[];
+                offset: number;
+            };
+            head: {
+                path: string[];
+                offset: number;
+            };
+        };
+    };
     isFocused: boolean;
 };
 
 export const zChangeMyUserRequest = implement<
-    Partial<Pick<User, 'name' | 'selection' | 'isFocused'>>
+    Partial<Pick<User, 'name' | 'selection' | 'isFocused' | 'notes'>>
 >().with({
     name: z.string().optional(),
-    selection: implement<Exclude<User['selection'], null>>().with({
+    selection: implement<Exclude<User['selection'], undefined>>().with({
         startLine: z.number(),
         startChar: z.number(),
         endLine: z.number(),
         endChar: z.number(),
+    }).optional(),
+    notes: implement<Exclude<User['notes'], undefined>>().with({
+        selection: implement<Exclude<Exclude<User['notes'], undefined>['selection'], null>>().with({
+            anchor: implement<Exclude<Exclude<User['notes'], undefined>['selection']['anchor'], null>>().with({
+                path: z.array(z.string()),
+                offset: z.number(),
+            }),
+            head: implement<Exclude<Exclude<User['notes'], undefined>['selection']['head'], null>>().with({
+                path: z.array(z.string()),
+                offset: z.number(),
+            }),
+        }),
     }).optional(),
     isFocused: z.boolean().optional(),
 });

@@ -2,6 +2,13 @@ import { useEditor, EditorContent, Extension, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from './ui/button';
 import { uniqueId } from '~/lib/tiptap/uniqueId';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
+import { PenLine } from 'lucide-react';
+import { useRoomContext } from './contexts/useRoomContext';
+import { diffChars } from 'diff';
+import { DOMSerializer, Fragment } from '@tiptap/pm/model';
+import { useEffect } from 'react';
 
 const myExtension = Extension.create({
     name: 'myExtension',
@@ -29,19 +36,48 @@ const myExtension = Extension.create({
             },
         };
     },
+    addProseMirrorPlugins() {
+        return [
+            new Plugin({
+                key: new PluginKey('collaborationCursorPlugin'),
+                props: {
+                    decorations: state => {
+                        const decorations: Decoration[] = [];
+
+                        state.doc.descendants((node, pos) => {
+                            if (node.type.name === 'paragraph') {
+                                const from = pos + 1 + 3;
+                                const to = from + 4;
+
+                                decorations.push(
+                                    Decoration.node(from, from + 1, {
+                                        class: `yRemoteSelectionHead yRemoteSelectionHead-${123}`,
+                                    }),
+                                    // Decoration.inline(from, to, {
+                                    //     class: `yRemoteSelection yRemoteSelection-${123}`,
+                                    // }),
+                                );
+                            }
+                        });
+
+                        return DecorationSet.create(state.doc, decorations);
+                    },
+                },
+            }),
+        ];
+    },
 });
 
 const UNIQUE_ID_ATTRIBUTE = 'data-uid';
 
 const extensions = [
     StarterKit,
-    myExtension,
+    // myExtension.configure({}),
     uniqueId.configure({
         attributeName: UNIQUE_ID_ATTRIBUTE,
         types: ['paragraph', 'heading', 'orderedList', 'bulletList', 'listItem'],
     }),
 ];
-const content = '<p>Hello World! 🌍️</p>'.repeat(1);
 
 const getPathPosition = (editor: Editor, pos: number) => {
     const { node, offset } = editor.view.domAtPos(pos);
@@ -85,24 +121,98 @@ const pathPositionToGlobalPosition = (
 };
 
 export const NotesEditor = () => {
+    const roomContext = useRoomContext();
+    const changeMyUser = roomContext?.changeMyUser;
+
     const editor = useEditor({
         extensions,
-        content,
+        content: roomContext?.notesContent ?? '',
         editorProps: {
             attributes: {
                 class: '!static overflow-y-auto h-full px-3 focus:outline-none',
             },
         },
-        onUpdate: ({ editor }) => {
-            console.log('content changed', editor.getHTML());
-        },
-        onSelectionUpdate: ({ editor }) => {
-            console.log('Selection changed', {
-                anchor: getPathPosition(editor, editor.state.selection.anchor),
-                head: getPathPosition(editor, editor.state.selection.head),
+        onUpdate: ({ editor, transaction }) => {
+            const getHtml = (fragment: Fragment) => {
+                const div = document.createElement('div');
+                div.appendChild(
+                    DOMSerializer.fromSchema(editor.state.schema).serializeFragment(fragment),
+                );
+                return div.innerHTML;
+            };
+
+            const oldHtml = roomContext?.getNotesContent() || '';
+            const newHtml = getHtml(transaction.doc.content);
+
+            if (oldHtml === newHtml) return;
+
+            const diff = diffChars(oldHtml, newHtml);
+
+            roomContext?.updateNotesContent((ins, del) => {
+                let charIndex = 0;
+                for (const part of diff) {
+                    if (part.added) {
+                        ins(charIndex, part.value);
+                    } else if (part.removed) {
+                        del(charIndex, part.count ?? 0);
+                    }
+
+                    if (!part.removed) {
+                        charIndex += part.count ?? 0;
+                    }
+                }
             });
         },
+        onSelectionUpdate: ({ editor }) => {
+            const anchorPos = getPathPosition(editor, editor.state.selection.anchor) ?? {
+                path: [],
+                offset: 0,
+            };
+            const headPos = getPathPosition(editor, editor.state.selection.head) ?? {
+                path: [],
+                offset: 0,
+            };
+
+            changeMyUser?.(user => ({
+                ...user,
+                notes: {
+                    ...user.notes,
+                    selection: {
+                        anchor: anchorPos,
+                        head: headPos,
+                    },
+                },
+            }));
+        },
     });
+
+    useEffect(() => () => editor?.destroy(), [editor]);
+
+    useEffect(() => {
+        return;
+        if (!editor) return;
+        if (!roomContext?.notesContent) return;
+
+        console.log({
+            notesContent: roomContext.notesContent,
+            editorContent: editor.getHTML(),
+        });
+        if (editor.getHTML() === roomContext.notesContent) return;
+
+        const pathSelection = {
+            anchor: getPathPosition(editor, editor.state.selection.anchor),
+            head: getPathPosition(editor, editor.state.selection.head),
+        };
+
+        editor.commands.setContent(roomContext.notesContent);
+
+        editor.commands.setTextSelection({
+            from: pathSelection.anchor
+                ? pathPositionToGlobalPosition(editor, pathSelection.anchor)
+                : 0,
+            to: pathSelection.head ? pathPositionToGlobalPosition(editor, pathSelection.head) : 0,
+        });
+    }, [editor, roomContext?.notesContent]);
 
     const handleDebugInsert = () => {
         if (!editor) return;
@@ -129,7 +239,9 @@ export const NotesEditor = () => {
     return (
         <div className="flex flex-col h-full">
             <div className="px-3 py-2 flex justify-between items-center min-h-11">
-                <div>Notes</div>
+                <span className="flex gap-2 items-center">
+                    <PenLine size={16} /> Notes
+                </span>
                 <div className="ml-3 space-x-3">
                     <span className="text-sm opacity-50">Candidates can't see this</span>
                     <Button size="xs" variant="secondary" onClick={handleDebugInsert}>

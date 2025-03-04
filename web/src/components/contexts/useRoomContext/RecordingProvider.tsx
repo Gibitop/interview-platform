@@ -8,6 +8,7 @@ import { useActiveFileContent } from './useActiveFileContent';
 import { useTerminal } from './useTerminal';
 import { Playback } from '~/components/Playback';
 import { useMockSocket } from '~/hooks/useMockSocket';
+import { useNotesContent } from './useNotesContent';
 
 type TRecordingContextProviderProps = {
     children: React.ReactNode;
@@ -34,6 +35,12 @@ export const RecordingProvider = ({ children, recording }: TRecordingContextProv
     } = useActiveFileContent(mockSocket, activeFilePath);
 
     const {
+        notesContent,
+        getNotesContent,
+        resetState: resetNotesContentState,
+    } = useNotesContent(mockSocket);
+
+    const {
         addTerminalOutputListener,
         removeTerminalOutputListener,
         resetState: resetTerminal,
@@ -44,7 +51,14 @@ export const RecordingProvider = ({ children, recording }: TRecordingContextProv
         resetActiveFilePath();
         resetActiveFileContent();
         resetTerminal();
-    }, [resetActiveFileContent, resetActiveFilePath, resetTerminal, resetUsers]);
+        resetNotesContentState();
+    }, [
+        resetActiveFileContent,
+        resetActiveFilePath,
+        resetNotesContentState,
+        resetTerminal,
+        resetUsers,
+    ]);
 
     return (
         <roomContext.Provider
@@ -60,6 +74,9 @@ export const RecordingProvider = ({ children, recording }: TRecordingContextProv
                 activeFileContent,
                 getActiveFileContent,
                 updateActiveFileContent: () => {},
+                notesContent,
+                getNotesContent,
+                updateNotesContent: () => {},
                 writeToTerminal: () => {},
                 addTerminalOutputListener,
                 removeTerminalOutputListener,

@@ -7,6 +7,7 @@ import { setup as setupActiveFilePath } from './controllers/activeFilePath';
 import { setup as setupTerminal } from './controllers/terminal';
 import { setup as setupUpload } from './controllers/upload';
 import { setup as setupCopy } from './controllers/copy';
+import { setup as setupNotes } from './controllers/notes';
 import { getRecording, startRecording } from './recorder';
 import { validateBackendJwt } from './utils/validateHostJwt';
 
@@ -49,6 +50,7 @@ server.ready().then(() => {
     setupActiveFileContent(server.io);
     setupTerminal(server.io);
     setupUpload(server.io);
+    setupNotes(server.io);
 
     startRecording();
 });

@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { useRoomContext } from './contexts/useRoomContext';
 import { useRoomStore } from '~/stores/room';
 import '@xterm/xterm/css/xterm.css';
+import { TerminalIcon } from 'lucide-react';
 
 export const Terminal = () => {
     const { elRef, terminalRef } = useXterm();
@@ -49,7 +50,10 @@ export const Terminal = () => {
                 onChange={handleUpload}
             />
             <div className="px-3 py-2 flex justify-between min-h-11 ">
-                {isHost ? 'Terminal (read-write)' : 'Terminal (read-only)'}
+                <span className="flex gap-2 items-center">
+                    <TerminalIcon size={16} />
+                    {isHost ? 'Terminal (read-write)' : 'Terminal (read-only)'}
+                </span>
                 <div className="flex gap-3">
                     {isHost && (
                         <Button

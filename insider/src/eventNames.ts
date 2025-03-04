@@ -8,6 +8,8 @@ export type C2SEvent =
     | 'request-available-files'
     | 'change-active-file-path'
     | 'uploadFile'
+    | 'request-notes-content'
+    | 'patch-notes-content'
     ;
 
 export type S2CEvent =
@@ -18,4 +20,6 @@ export type S2CEvent =
     | 'active-file-content-patched'
     | 'active-file-path-changed'
     | 'available-files-changed'
+    | 'notes-content-patched'
+    | 'notes-content-rewritten'
     ;

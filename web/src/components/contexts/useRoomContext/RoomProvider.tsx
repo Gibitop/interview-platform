@@ -9,6 +9,7 @@ import { useCandidateCopy } from './useCandidateCopy';
 import { useRoomUsers } from './useRoomUsers';
 import { useTerminal } from './useTerminal';
 import { useUploadFile } from './useUploadFile';
+import { useNotesContent } from './useNotesContent';
 
 export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
     const roomStore = useRoomStore(data => data);
@@ -49,6 +50,11 @@ export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
     const { activeFileContent, getActiveFileContent, updateActiveFileContent } =
         useActiveFileContent(socket, activeFilePath, roomStore?.role);
 
+    const { notesContent, getNotesContent, updateNotesContent } = useNotesContent(
+        socket,
+        roomStore?.role,
+    );
+
     const { reportCopy } = useCandidateCopy(socket, users, roomStore?.role);
 
     const { addTerminalOutputListener, removeTerminalOutputListener, writeToTerminal } =
@@ -80,6 +86,9 @@ export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
                 activeFileContent,
                 getActiveFileContent,
                 updateActiveFileContent,
+                notesContent,
+                getNotesContent,
+                updateNotesContent,
                 writeToTerminal,
                 addTerminalOutputListener,
                 removeTerminalOutputListener,

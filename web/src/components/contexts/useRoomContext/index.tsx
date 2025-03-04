@@ -7,10 +7,12 @@ export type TRoomContextProviderProps = {
     children: React.ReactNode;
 };
 
-type TRoomContext = {
+export type TRoomContext = {
     myId: string;
     users: User[];
-    changeMyUser: (data: ChangeMyUserRequest) => void;
+    changeMyUser: (
+        data: ChangeMyUserRequest | ((user: ChangeMyUserRequest) => ChangeMyUserRequest),
+    ) => void;
     reportCopy: () => void;
     activeFilePath: string;
     availableFiles: string[];
@@ -19,6 +21,9 @@ type TRoomContext = {
     activeFileContent: string;
     getActiveFileContent: () => string;
     updateActiveFileContent: (cb: (ins: StrApi['ins'], del: StrApi['del']) => void) => void;
+    notesContent: string;
+    getNotesContent: () => string;
+    updateNotesContent: (cb: (ins: StrApi['ins'], del: StrApi['del']) => void) => void;
     writeToTerminal: (data: string) => void;
     addTerminalOutputListener: (cb: (data: string) => void) => void;
     removeTerminalOutputListener: (cb: (data: string) => void) => void;

@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
 import type { C2SEvent, S2CEvent } from '~insider/eventNames';
-import type { ChangeMyUserRequest, User } from '~insider/types/users';
+import type { User } from '~insider/types/users';
 import { AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import type { TRoomContext } from '.';
 
 export const useRoomUsers = (
     socket: Socket | null,
@@ -13,27 +14,36 @@ export const useRoomUsers = (
 ) => {
     const [users, setUsers] = useState<User[]>([]);
 
-    const changeMyUser = useCallback(
-        (data: ChangeMyUserRequest) => {
+    const changeMyUser: TRoomContext['changeMyUser'] = useCallback(
+        dataOrSetter => {
             if (!socket || !socket.connected) return;
-
-            if (role !== 'recorder') {
-                let ack = false;
-                socket.emit('change-my-user' satisfies C2SEvent, data, () => {
-                    ack = true;
-                });
-                setTimeout(() => {
-                    if (!ack) {
-                        changeMyUser(data);
-                    }
-                }, 200);
-            }
 
             setUsers(prev => {
                 if (!socket || !socket.connected) return prev;
 
                 const newUsers = [...prev];
                 const myIndex = newUsers.findIndex(({ id }) => id === socket!.id);
+
+                if (myIndex === -1) return prev;
+
+                const data =
+                    typeof dataOrSetter === 'function'
+                        ? dataOrSetter(newUsers[myIndex])
+                        : dataOrSetter;
+
+                // ! Side effect. Might cause problems
+                // TODO: Fix this in refactor
+                if (role !== 'recorder') {
+                    let ack = false;
+                    socket.emit('change-my-user' satisfies C2SEvent, data, () => {
+                        ack = true;
+                    });
+                    setTimeout(() => {
+                        if (!ack) {
+                            changeMyUser(dataOrSetter);
+                        }
+                    }, 200);
+                }
                 newUsers[myIndex] = { ...newUsers[myIndex], ...data };
                 return newUsers;
             });

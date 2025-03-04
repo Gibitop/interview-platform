@@ -5,7 +5,6 @@ import { ArrowLeft, Flag, FlagOff } from 'lucide-react';
 import { Logo } from './Logo';
 import { Participants } from './Participants';
 import { ProfileButton } from './ProfileButton';
-import { ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import { CodeEditor } from './CodeEditor';
 import { Terminal } from './Terminal';
 import { AppRouter } from '~backend/trpc/router';
@@ -14,7 +13,8 @@ import { ROOM_TYPE_NAMES } from '~/consts/roomTypes';
 import { SimpleTooltip } from './simple/SimpleTooltip';
 import { useState } from 'react';
 import { NotesEditor } from './NotesEditor';
-import { PanelResizeHandle } from 'react-resizable-panels';
+import { cn } from '~/utils/shadcn';
+import { roomContext } from './contexts/useRoomContext';
 
 export type RoomLayoutProps = {
     role: Role;
@@ -28,6 +28,8 @@ export type RoomLayoutProps = {
 
 export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLayoutProps) => {
     const [usernameCursorsVisible, setUsernameCursorsVisible] = useState(true);
+
+    const topRightPanelVisible = role !== 'candidate' && !!roomInfo;
 
     return (
         <>
@@ -74,23 +76,25 @@ export const RoomLayout = ({ role, roomInfo, roomNamePrefix, backLink }: RoomLay
                     <ProfileButton />
                 </div>
             </div>
-            <div className="flex-1 flex overflow-hidden">
-                <ResizablePanelGroup direction="horizontal">
-                    {role !== 'candidate' && (
-                        <>
-                            <ResizablePanel className="border-r border-r-neutral-800">
-                                <NotesEditor />
-                            </ResizablePanel>
-                            <PanelResizeHandle />
-                        </>
+            <div className="flex-1 flex overflow-y-hidden overflow-x-auto">
+                <div className="flex-1 min-w-[600px]">
+                    <CodeEditor role={role} usernameCursorsVisible={usernameCursorsVisible} />
+                </div>
+                <div className="flex flex-col border-l border-l-neutral-800">
+                    {topRightPanelVisible && (
+                        <div className="flex-grow-0 flex-shrink-0 basis-1/2 max-h-[50%]">
+                            {roomContext && <NotesEditor />}
+                        </div>
                     )}
-                    <ResizablePanel>
-                        <CodeEditor role={role} usernameCursorsVisible={usernameCursorsVisible} />
-                    </ResizablePanel>
-                </ResizablePanelGroup>
-                {/* <div className="flex flex-col border-l border-l-neutral-800">
-                    <Terminal />
-                </div> */}
+                    <div
+                        className={cn(
+                            'flex-grow-0 flex-shrink-0 basis-1/2',
+                            topRightPanelVisible && 'max-h-[50%]',
+                        )}
+                    >
+                        <Terminal />
+                    </div>
+                </div>
             </div>
         </>
     );

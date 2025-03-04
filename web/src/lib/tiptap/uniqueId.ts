@@ -23,7 +23,12 @@ export const uniqueId = Extension.create({
     addOptions: () => ({
         attributeName: 'id',
         types: [] as string[],
-        createId: () => window.crypto.randomUUID(),
+        createId: () => {
+            const id = window.crypto.randomUUID();
+
+            console.log({ id });
+            return id;
+        },
     }),
     addGlobalAttributes() {
         return [
@@ -56,7 +61,6 @@ export const uniqueId = Extension.create({
             doc,
             node => types.includes(node.type.name) && node.attrs[attributeName] == null,
         ).forEach(({ node, pos }) => {
-            console.log('createId on', node);
             tr.setNodeMarkup(pos, undefined, {
                 ...node.attrs,
                 [attributeName]: createId(),
@@ -86,6 +90,8 @@ export const uniqueId = Extension.create({
                         const newNodes = findChildrenInRange(newDoc, newRange, node =>
                             types.includes(node.type.name),
                         );
+
+                        console.log({ newNodes });
 
                         const newIds = newNodes
                             .map(({ node }) => node.attrs[attributeName])

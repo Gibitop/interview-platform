@@ -6,6 +6,10 @@ body {
     @apply dark:bg-neutral-900 dark:text-neutral-100;
 }
 
+.yRemoteSelection-123 {
+    --user-color: rgba(255, 0, 0, 0.5);
+    opacity: 1 !important;
+}
 
 .yRemoteSelection {
     background-color: var(--user-color);
