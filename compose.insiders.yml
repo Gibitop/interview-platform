@@ -11,3 +11,24 @@ services:
                 PERSISTENCE_DIRECTORY_PATH: $INSIDER_PERSISTENCE_DIRECTORY_PATH
                 WORKING_DIRECTORY: $INSIDER_WORKING_DIRECTORY
                 START_ACTIVE_FILE_NAME: $INSIDER_START_ACTIVE_FILE_NAME
+    insider-java:
+        image: ghcr.io/gibitop/interview-platform-insider-java:latest
+        depends_on:
+            - insider-node
+        build:
+            context: ./insider
+            dockerfile: ../dockerfiles/insider-java.Dockerfile
+    insider-golang:
+        image: ghcr.io/gibitop/interview-platform-insider-golang:latest
+        depends_on:
+            - insider-node
+        build:
+            context: ./insider
+            dockerfile: ../dockerfiles/insider-golang.Dockerfile
+    insider-python3:
+        image: ghcr.io/gibitop/interview-platform-insider-python3:latest
+        depends_on:
+            - insider-node
+        build:
+            context: ./insider
+            dockerfile: ../dockerfiles/insider-python3.Dockerfile

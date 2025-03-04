@@ -96,7 +96,7 @@ You can kill the process with `^C` after a few seconds
     REGISTRATION_OPEN='true'
     INSIDER_PERSISTENCE_DIRECTORY_PATH='/persistance'
     INSIDER_WORKING_DIRECTORY='/interview'
-    INSIDER_START_ACTIVE_FILE_NAME='index.ts'
+    INSIDER_START_ACTIVE_FILE_NAME='readme.txt'
     USE_LOCALHOST_INSIDER='true'
     ```
 6. Run DB migration
@@ -132,7 +132,7 @@ You can kill the process with `^C` after a few seconds
     ```bash
     NODE_ENV='development'
     WORKING_DIRECTORY='./wd'
-    START_ACTIVE_FILE_NAME='index.ts'
+    START_ACTIVE_FILE_NAME='readme.txt'
     ROOM_INFO='{"json":{"id":"69a1c450-9701-4c0d-bb36-b839c79f3526","name":"test-room","type":"node","createdAt":"2024-10-02T19:57:11.011Z"},"meta":{"values":{"createdAt":["Date"]}}}'
     PERSISTENCE_DIRECTORY_PATH='./persistence'
     ```

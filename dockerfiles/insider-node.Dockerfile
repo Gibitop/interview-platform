@@ -38,6 +38,6 @@ RUN chown node:node $PERSISTENCE_DIRECTORY_PATH
 
 USER node
 
-RUN echo "// Hello World!" > "$WORKING_DIRECTORY/$START_ACTIVE_FILE_NAME"
+RUN echo "Welcome" > "$WORKING_DIRECTORY/$START_ACTIVE_FILE_NAME"
 
 CMD node dist/src/main.js
