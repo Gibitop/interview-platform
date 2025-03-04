@@ -48,5 +48,5 @@ echo "DOMAIN='$DOMAIN'" >> .env
 echo "PORT='$PORT'" >> .env
 echo "INSIDER_JWT_PUBLIC_KEY_PATH='$INSIDER_JWT_PUBLIC_KEY_PATH'" >> .env
 echo "INSIDER_WORKING_DIRECTORY='/interview'" >> .env
-echo "INSIDER_START_ACTIVE_FILE_NAME='index.ts'" >> .env
+echo "INSIDER_START_ACTIVE_FILE_NAME='readme.txt'" >> .env
 echo "INSIDER_PERSISTENCE_DIRECTORY_PATH='/persistence'" >> .env
