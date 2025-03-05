@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.3.0 - Added support for java, golang and python
+### Common
+- Replaced starting room file `index.ts` -> `readme.txt`
+- Added support for creating rooms with `java`, `golang` and `python3` languages
+
+### Web
+- Added correct syntax highlighting for `.json`, `.java`, `.go` and `.py` files
+- Disabled the format button for unsupported file types
+- Disabled loading language servers for `html`, `handlebars`, `razor`, `json`, `css`, `scss` and `less` languages
+
+### Insider
+- Created an `insider-java` image
+- Created an `insider-golang` image
+- Created an `insider-python3` image
+- Replaced default file content `// Hello, World` -> `Welcome`
+
+
 ## 2.2.0 - Stability update
 
 ### Common
