@@ -1,6 +1,6 @@
 {
     "name": "insider",
-    "version": "2.2.1",
+    "version": "2.3.1",
     "main": "index.js",
     "license": "MIT",
     "type": "module",
