@@ -52,7 +52,7 @@ const Room = () => {
     );
 };
 
-export const Route = createFileRoute('/rooms/$roomId')({
+export const Route = createFileRoute('/rooms_/$roomId')({
     parseParams: params => roomParamsSchema.parse(params),
     onError: () => window.location.replace('/'),
     component: Room,
