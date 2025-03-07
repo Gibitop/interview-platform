@@ -1,11 +1,11 @@
-FROM node:22.11-alpine3.20
+FROM oven/bun:1.2.4-alpine
 
 WORKDIR /app
 
 COPY package.json package.json
-COPY package-lock.json package-lock.json
-RUN npm install
+COPY bun.lock bun.lock
+RUN bun install --frozen-lockfile
 
 COPY . .
 
-CMD npm run drizzle-migrate
+CMD bun drizzle-migrate

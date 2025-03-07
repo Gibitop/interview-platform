@@ -88,7 +88,7 @@ const NameColumn = ({
     if (!isActive || isStoppingRoom) name;
 
     return (
-        <Link className="underline" to={`/rooms/${uuidToHumanId(id)}`}>
+        <Link className="underline" to="/rooms/$roomId" params={{ roomId: uuidToHumanId(id) }}>
             {name}
         </Link>
     );
@@ -122,7 +122,7 @@ const columns: ColumnDef<
         id: 'actions',
         meta: { noPadding: true },
         cell: ({ row }) => (
-            <div className="space-x-2 text-end px-4 py-2">
+            <div className="px-4 py-2 space-x-2 text-end">
                 {row.original.isActive ? (
                     <ActiveRoomActionsColumn roomId={row.original.id} />
                 ) : (
@@ -142,10 +142,10 @@ const AuthedComponent = () => {
     const newRoomButtonRef = useRef<HTMLButtonElement>(null);
 
     return (
-        <ControlPanelLayout className="h-full flex flex-col justify-between">
+        <ControlPanelLayout className="flex flex-col justify-between h-full">
             <div>
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-semibold text-3xl">My rooms</h2>
+                    <h2 className="text-3xl font-semibold">My rooms</h2>
                     <CreateRoomDialog>
                         <Button size="sm" ref={newRoomButtonRef}>
                             <Plus className="mr-2" />

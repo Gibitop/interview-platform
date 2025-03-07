@@ -1,0 +1,34 @@
+name: Docker Compose Build
+
+on:
+  pull_request:
+    branches: [master]
+
+env:
+  DOCKER_DEFAULT_PLATFORM: linux/amd64
+  INSIDER_WORKING_DIRECTORY: '/interview'
+  INSIDER_START_ACTIVE_FILE_NAME: 'readme.txt'
+  INSIDER_PERSISTENCE_DIRECTORY_PATH: '/persistence'
+
+jobs:
+  build-main:
+    name: Build Main Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build main services
+        run: docker compose build --no-cache
+
+  build-insiders:
+    name: Build Insider Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build insider services
+        run: docker compose -f compose.insiders.yml build --no-cache

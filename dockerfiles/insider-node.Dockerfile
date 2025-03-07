@@ -1,18 +1,18 @@
-FROM node:22.11-alpine3.20
+FROM imbios/bun-node:1.2.4-22.14.0-alpine
 
 # Required for node-pty
 RUN apk add make python3 g++
 
 WORKDIR /app
 COPY package.json package.json
-COPY package-lock.json package-lock.json
-RUN npm install
+COPY bun.lock bun.lock
+RUN bun install --frozen-lockfile
 
 COPY . .
-RUN npm run build
+RUN bun run build
 
 
-FROM node:22.11-alpine3.20
+FROM imbios/bun-node:1.2.4-22.14.0-alpine
 
 # Required for node-pty
 RUN apk add make python3 g++
@@ -20,8 +20,8 @@ RUN apk add make python3 g++
 WORKDIR /app
 
 COPY --from=0 /app/package.json package.json
-COPY --from=0 /app/package-lock.json package-lock.json
-RUN npm install --omit=dev
+COPY --from=0 /app/bun.lock bun.lock
+RUN bun install --production --frozen-lockfile
 
 COPY --from=0 /app/dist dist
 

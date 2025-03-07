@@ -64,11 +64,11 @@ You can kill the process with `^C` after a few seconds
     ```
 2. Install dependecies
     ```bash
-    npm install
+    bun install
     ```
 3. Start dev server
     ```bash
-    npm run dev
+    bun dev
     ```
 
 > [!NOTE]
@@ -83,7 +83,7 @@ You can kill the process with `^C` after a few seconds
     ```
 2. Install dependecies
     ```bash
-    npm install
+    bun install
     ```
 3. Launch docker daemon
 4. Create a Postgres DB
@@ -101,23 +101,23 @@ You can kill the process with `^C` after a few seconds
     ```
 6. Run DB migration
     ```bash
-    npm run drizzle-migrate
+    bun drizzle-migrate
     ```
 7. Start dev server
     ```bash
-    npm run dev
+    bun dev
     ```
 
 > [!TIP]
 > You can prototype DB changes using
 > ```bash
-> npm run drizzle-push
+> bun drizzle-push
 > ```
 
 > [!IMPORTANT]
 > Before committing, run
 > ```bash
-> npm run drizzle-generate
+> bun drizzle-generate
 > ```
 > To save your changes as a DB migration file
 
@@ -138,13 +138,16 @@ You can kill the process with `^C` after a few seconds
     ```
 3. Install dependecies
     ```bash
-    npm install
+    bun install
     ```
 4. Start dev server
     ```bash
-    npm run dev
+    bun dev
     ```
 
+> [!NOTE]
+> While `insider`'s packages are managed with `bun`, it still has to run `Node.js`, because `node-pty` package only works on node \
+> https://github.com/microsoft/node-pty/issues/632
 
 ## Security
 

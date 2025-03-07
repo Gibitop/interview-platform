@@ -28,7 +28,6 @@
 
 # Later
 - Linting and formatting
-- Other languages support
 - Ignore files from being available (eg: node_modules/*)
 - Bundle optimizations
 - Iframe

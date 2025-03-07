@@ -1,0 +1,58 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  DOCKER_DEFAULT_PLATFORM: linux/amd64
+  INSIDER_WORKING_DIRECTORY: '/interview'
+  INSIDER_START_ACTIVE_FILE_NAME: 'readme.txt'
+  INSIDER_PERSISTENCE_DIRECTORY_PATH: '/persistence'
+
+jobs:
+  build-and-push-main:
+    name: Build and Push Main Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push main services
+        run: |
+          docker compose build --no-cache
+          docker compose push
+
+  build-and-push-insiders:
+    name: Build and Push Insider Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push insider services
+        run: |
+          docker compose -f compose.insiders.yml build --no-cache
+          docker compose -f compose.insiders.yml push

@@ -11,7 +11,7 @@ import { useTerminal } from './useTerminal';
 import { useUploadFile } from './useUploadFile';
 
 export const RoomProvider = ({ children }: TRoomContextProviderProps) => {
-    const roomStore = useRoomStore(data => data);
+    const roomStore = useRoomStore();
     const { data: selfUser } = trpc.auth.getSelf.useQuery();
 
     const [socket, setSocket] = useState<Socket | null>(null);

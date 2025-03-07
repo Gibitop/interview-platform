@@ -9,7 +9,7 @@ export const Terminal = () => {
     const { elRef, terminalRef } = useXterm();
 
     const roomContext = useRoomContext();
-    const isHost = useRoomStore(data => data?.role === 'host');
+    const isHost = useRoomStore(data => data?.role) === 'host';
 
     useEffect(() => {
         if (!roomContext || !terminalRef.current) return;
@@ -48,7 +48,7 @@ export const Terminal = () => {
                 className="hidden"
                 onChange={handleUpload}
             />
-            <div className="px-3 py-2 flex justify-between">
+            <div className="flex justify-between px-3 py-2">
                 {isHost ? 'Terminal (read-write)' : 'Terminal (read-only)'}
                 <div className="flex gap-3">
                     {isHost && (

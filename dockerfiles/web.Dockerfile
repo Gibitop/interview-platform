@@ -1,24 +1,19 @@
-FROM node:22.11-alpine3.20
+FROM oven/bun:1.2.4-alpine
 
 WORKDIR /app/backend
-COPY backend/package.json ./package.json
-COPY backend/package-lock.json ./package-lock.json
-RUN npm install
+COPY --from=ghcr.io/gibitop/interview-platform-backend:latest app .
 
 WORKDIR /app/insider
 COPY insider .
 
 WORKDIR /app/web
 COPY web/package.json ./package.json
-COPY web/package-lock.json ./package-lock.json
-RUN npm install
-
-WORKDIR /app/backend
-COPY backend .
+COPY web/bun.lock ./bun.lock
+RUN bun install --frozen-lockfile
 
 WORKDIR /app/web
 COPY web .
-RUN npm run build
+RUN bun run build
 
 
 FROM caddy:2.8.4-alpine
