@@ -173,7 +173,7 @@ export const Playback = ({ recording, onEmit, onReset }: PlaybackProps) => {
                     variant={skipLongPauses ? 'default' : 'secondary'}
                     size="icon-sm"
                     onClick={handleToggleSkipLongPauses}
-                    className="text-lg flex-shrink-0"
+                    className="text-lg shrink-0"
                 >
                     <Rocket size={18} />
                 </Button>
@@ -182,7 +182,7 @@ export const Playback = ({ recording, onEmit, onReset }: PlaybackProps) => {
                 variant="secondary"
                 size="icon-sm"
                 onClick={handleChangeSpeed}
-                className="flex-shrink-0"
+                className="shrink-0"
             >
                 x{playbackSpeed}
             </Button>
@@ -190,7 +190,7 @@ export const Playback = ({ recording, onEmit, onReset }: PlaybackProps) => {
                 variant="secondary"
                 size="icon-sm"
                 onClick={handlePlayPause}
-                className="flex-shrink-0"
+                className="shrink-0"
             >
                 {playing ? <Pause size={18} /> : <Play size={18} />}
             </Button>

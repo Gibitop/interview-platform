@@ -88,13 +88,13 @@ export const useRoomUsers = (
             changeMyUser({ isFocused: true });
         };
 
-        window.addEventListener('blur', blurListener);
+        window.addEventListener('blur-sm', blurListener);
         window.addEventListener('focus', focusListener);
 
         return () => {
             socket.off('connect', connectionListener);
             socket.off('users-changed' satisfies S2CEvent, usersChangeListener);
-            window.removeEventListener('blur', blurListener);
+            window.removeEventListener('blur-sm', blurListener);
             window.removeEventListener('focus', focusListener);
             setUsers([]);
         };
