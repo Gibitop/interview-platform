@@ -25,7 +25,7 @@ export const SimpleForm = <TFieldValues extends FieldValues>({
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmitSuccess)}
-                className={cn('space-y-6', className)}
+                className={cn('flex flex-col gap-6', className)}
             >
                 {children}
                 <Button className="w-full" type="submit" disabled={isLoading}>

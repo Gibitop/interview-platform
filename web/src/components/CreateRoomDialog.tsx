@@ -7,17 +7,16 @@ import {
     DialogTrigger,
 } from '../components/ui/dialog';
 import { trpc } from '~/lib/trpc';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-import { Button } from './ui/button';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
 import { ROOM_TYPE_NAMES, ROOM_TYPES } from '~/consts/roomTypes';
+import { SimpleFormField } from './simple/SimpleFormField';
+import { SimpleForm } from './simple/SimpleForm';
 
 export type TCreateRoomDialogProps = {
     children: React.ReactNode;
@@ -55,57 +54,40 @@ export const CreateRoomDialog: React.FC<TCreateRoomDialogProps> = ({ children })
                 <DialogHeader>
                     <DialogTitle>Create new room</DialogTitle>
                 </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid">
-                        <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                disabled={isPending}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Room name</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} placeholder="John Doe" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="type"
-                                disabled={isPending}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Room type</FormLabel>
-                                        <FormControl>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {ROOM_TYPES.map(type => (
-                                                        <SelectItem key={type} value={type}>
-                                                            {ROOM_TYPE_NAMES[type]}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <Button type="submit" className="mt-5" disabled={isPending}>
-                            {isPending ? <Loader2 /> : 'Create'}
-                        </Button>
-                    </form>
-                </Form>
+                <SimpleForm
+                    form={form}
+                    onSubmitSuccess={onSubmit}
+                    isLoading={isPending}
+                    submitButtonContent="Create"
+                >
+                    <SimpleFormField
+                        control={form.control}
+                        name="name"
+                        label="Room name"
+                        disabled={isPending}
+                        render={({ field }) => <Input {...field} placeholder="John Doe" />}
+                    />
+                    <SimpleFormField
+                        control={form.control}
+                        name="type"
+                        label="Room type"
+                        disabled={isPending}
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ROOM_TYPES.map(type => (
+                                        <SelectItem key={type} value={type}>
+                                            {ROOM_TYPE_NAMES[type]}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </SimpleForm>
             </DialogContent>
         </Dialog>
     );

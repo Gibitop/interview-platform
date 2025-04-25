@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 
 export interface Refinement<T> {
     /**
@@ -35,20 +35,18 @@ export default function useRefinement<T>(
     callback: RefinementCallback<T>,
     { debounce }: { debounce?: number } = {},
 ): Refinement<T> {
-    const ctxRef = useRef() as MutableRefObject<RefinementContext<T>>;
-    const refinementRef = useRef() as MutableRefObject<{
+    const ctxRef = useRef<RefinementContext<T>>({ callback, debounce });
+    const refinementRef = useRef<{
         refine: Refinement<T>;
         abort(): void;
-    }>;
-
-    ctxRef.current = { callback, debounce };
+    }>(null);
 
     if (refinementRef.current == null) {
         refinementRef.current = createRefinement(ctxRef);
     }
 
     // Cleanup effect to abort ongoing refinement when the component unmounts
-    useEffect(() => () => refinementRef.current.abort(), []);
+    useEffect(() => () => refinementRef.current?.abort(), []);
 
     return refinementRef.current.refine;
 }
@@ -58,7 +56,7 @@ interface RefinementContext<T> {
     debounce?: number;
 }
 
-function createRefinement<T>(ctxRef: MutableRefObject<RefinementContext<T>>) {
+function createRefinement<T>(ctxRef: RefObject<RefinementContext<T>>) {
     let abortController: AbortController | null = null;
     let result: Promise<boolean> | null = null;
     let timeout: ReturnType<typeof setTimeout> | null = null;

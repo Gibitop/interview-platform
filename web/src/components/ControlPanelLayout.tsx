@@ -31,13 +31,13 @@ const NavButton = ({ to, children }: NavButtonProps) => {
 
 export const ControlPanelLayout = ({ children, className }: ControlPanelLayoutProps) => {
     return (
-        <div className="h-screen flex">
+        <div className="flex h-screen">
             <nav className="flex h-full">
-                <nav className="w-60 p-4 border-r border-neutral-800 flex flex-col justify-between items-center">
-                    <div className="flex-1">
+                <nav className="flex flex-col items-center justify-between p-4 border-r w-60 border-neutral-800">
+                    <div className="flex-1 w-full">
                         <Logo isSmall isCentered className="mt-1.5 mb-6 w-full" />
 
-                        <div className="space-y-1">
+                        <div className="flex flex-col gap-1">
                             <NavButton to="/rooms">My rooms</NavButton>
                             <NavButton to="/recordings">My recordings</NavButton>
                         </div>
@@ -45,7 +45,7 @@ export const ControlPanelLayout = ({ children, className }: ControlPanelLayoutPr
                     <ProfileButton withName fullWidth />
                 </nav>
             </nav>
-            <div className="overflow-y-auto w-full">
+            <div className="w-full overflow-y-auto">
                 <main className={cn('container p-4', className)}>{children}</main>
             </div>
         </div>

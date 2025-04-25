@@ -6,7 +6,7 @@ type SliderProps = React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> &
     size?: 'sm' | 'md';
 };
 
-const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
+const Slider = React.forwardRef<React.ComponentRef<typeof SliderPrimitive.Root>, SliderProps>(
     ({ className, size = 'md', ...props }, ref) => (
         <SliderPrimitive.Root
             ref={ref}

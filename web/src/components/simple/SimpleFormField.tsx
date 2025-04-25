@@ -36,7 +36,7 @@ export const SimpleFormField = <
             <FormItem className={className}>
                 <div
                     className={cn(
-                        !inline && 'space-y-2',
+                        !inline && 'flex flex-col gap-2',
                         inline && 'flex items-center gap-2 flex-row-reverse justify-end',
                     )}
                 >

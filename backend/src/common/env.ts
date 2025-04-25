@@ -6,7 +6,6 @@ config();
 
 export const env = createEnv({
     server: {
-        /** Set to `true` when using HTTPS */
         NODE_ENV: z.enum(['development', 'production']),
 
         USE_LOCALHOST_INSIDER: z
