@@ -33,6 +33,7 @@
     },
     "devDependencies": {
         "@total-typescript/ts-reset": "0.6.1",
+        "@types/bun": "^1.2.13",
         "@types/dockerode": "3.3.35",
         "@types/jsonwebtoken": "9.0.9",
         "@types/lodash": "4.17.16",

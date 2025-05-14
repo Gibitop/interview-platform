@@ -1,8 +1,4 @@
-@import 'tailwindcss' source(none);
-
-@source '../**/*{.ts,.tsx,.js,.jsx}';
-
-
+@import 'tailwindcss';
 @plugin 'tailwindcss-animate';
 @plugin '@tailwindcss/container-queries';
 

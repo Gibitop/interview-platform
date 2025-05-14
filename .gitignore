@@ -2,8 +2,10 @@
 
 *.old
 
-keys/
 *.env
 !example.env
-recordings/
+
 .DS_Store
+
+/keys/
+/recordings/

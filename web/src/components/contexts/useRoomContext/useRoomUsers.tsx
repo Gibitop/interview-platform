@@ -62,7 +62,7 @@ export const useRoomUsers = (
                         const newUser = newUsers.find(({ id }) => id === user.id);
                         if (newUser && !newUser.isFocused && user.isFocused) {
                             toast(
-                                <span className="flex flex-wrap gap-2 items-center">
+                                <span className="flex flex-wrap items-center gap-2">
                                     <AlertTriangle size={16} />
                                     Candidate{' '}
                                     <span className="font-semibold" style={{ color: user.color }}>
@@ -88,7 +88,7 @@ export const useRoomUsers = (
             changeMyUser({ isFocused: true });
         };
 
-        window.addEventListener('blur-sm', blurListener);
+        window.addEventListener('blur', blurListener);
         window.addEventListener('focus', focusListener);
 
         return () => {

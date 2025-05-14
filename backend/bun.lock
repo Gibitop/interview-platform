@@ -7,7 +7,7 @@
         "@fastify/cookie": "9.3.1",
         "@lucia-auth/adapter-drizzle": "1.1.0",
         "@t3-oss/env-core": "0.12.0",
-        "@trpc/server": "11.0.0-rc.824",
+        "@trpc/server": "11.0.0-rc.828",
         "argon2": "0.41.1",
         "dockerode": "4.0.4",
         "dotenv": "16.4.7",
@@ -23,6 +23,7 @@
       },
       "devDependencies": {
         "@total-typescript/ts-reset": "0.6.1",
+        "@types/bun": "^1.2.13",
         "@types/dockerode": "3.3.35",
         "@types/jsonwebtoken": "9.0.9",
         "@types/lodash": "4.17.16",
@@ -142,7 +143,9 @@
 
     "@total-typescript/ts-reset": ["@total-typescript/ts-reset@0.6.1", "", {}, "sha512-cka47fVSo6lfQDIATYqb/vO1nvFfbPw7uWLayIXIhGETj0wcOOlrlkobOMDNQOFr9QOafegUPq13V2+6vtD7yg=="],
 
-    "@trpc/server": ["@trpc/server@11.0.0-rc.824", "", { "peerDependencies": { "typescript": ">=5.7.2" } }, "sha512-6u6CZ/x+oe2bZDhOo5h0wonbMU3svPe8hs6Dr2ymrU+23NAHE6tHtROAX+dKrMzup9KJcqyAabuFRYHy2H0tjw=="],
+    "@trpc/server": ["@trpc/server@11.0.0-rc.828", "", { "peerDependencies": { "typescript": ">=5.7.2" } }, "sha512-+dvcIcE5QPy52cz4rqwfUqk+WQDYAH3Xri+u2t0NdzIoo78fnL14if8oSZXAPU1bCmWGyR1k/0m5rSQ7AZaKlQ=="],
+
+    "@types/bun": ["@types/bun@1.2.13", "", { "dependencies": { "bun-types": "1.2.13" } }, "sha512-u6vXep/i9VBxoJl3GjZsl/BFIsvML8DfVDO0RYLEwtSZSp981kEO1V5NwRcO1CPJ7AmvpbnDCiMKo3JvbDEjAg=="],
 
     "@types/docker-modem": ["@types/docker-modem@3.0.6", "", { "dependencies": { "@types/node": "*", "@types/ssh2": "*" } }, "sha512-yKpAGEuKRSS8wwx0joknWxsmLha78wNMe9R2S3UNsVOkZded8UqOrV8KoeDXoXsjndxwyF3eIhyClGbO1SEhEg=="],
 
@@ -195,6 +198,8 @@
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
 
     "buildcheck": ["buildcheck@0.0.6", "", {}, "sha512-8f9ZJCUXyT1M35Jx7MkBgmBMo3oHTTBIPLiY9xyL0pl3T5RwcPEY8cUHr5LBNfu/fk6c2T4DJZuVM/8ZZT2D2A=="],
+
+    "bun-types": ["bun-types@1.2.13", "", { "dependencies": { "@types/node": "*" } }, "sha512-rRjA1T6n7wto4gxhAO/ErZEtOXyEZEmnIHQfl0Dt1QQSB4QV0iP6BZ9/YB5fZaHFQ2dwHFrmPaRQ9GGMX01k9Q=="],
 
     "chownr": ["chownr@1.1.4", "", {}, "sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg=="],
 

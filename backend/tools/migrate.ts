@@ -18,6 +18,7 @@ export const env = createEnv({
 
 const sql = pg(env.DATABASE_URL, { max: 1 });
 const db = drizzle(sql);
-
-await migrate(db, { migrationsFolder: 'drizzle' });
-await sql.end();
+(async () => {
+    await migrate(db, { migrationsFolder: 'drizzle' });
+    await sql.end();
+})();

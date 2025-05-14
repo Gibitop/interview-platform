@@ -1,10 +1,10 @@
 # Refresh
-- On upload recording file page, the logo is missing
-- On upload recording file page, the back button top margin is missing
-- On upload recording file page, font size is too small
 - Notification close icon changed style
-- Focus tracking stopped working
 - Do I need @types/node
++ Focus tracking stopped working
++ On upload recording file page, the logo is missing
++ On upload recording file page, the back button top margin is missing
++ On upload recording file page, font size is too small
 + Dialogs appear with a different animation
 
 # Notes
