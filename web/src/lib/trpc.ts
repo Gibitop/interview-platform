@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import SuperJSON from '~/lib/super-json';
 import {
     createTRPCClient,
@@ -18,6 +19,7 @@ export const trpcOptions: CreateTRPCClientOptions<AppRouter> = {
         }),
     ],
 };
+// @ts-ignore - For some reason, TS errors when comparing frontend router type with backend router type. But this works including the types.
 export const trpc = createTRPCReact<AppRouter>();
 
 /**
@@ -25,8 +27,12 @@ export const trpc = createTRPCReact<AppRouter>();
  * Use this if the cache is irrelevant or don't forget to update
  * the cache by hand
  */
+// @ts-ignore - For some reason, TS errors when comparing frontend router type with backend router type. But this works including the types.
 export const trpcVanilla = createTRPCClient<AppRouter>(trpcOptions);
 
+// @ts-ignore - For some reason, TS errors when comparing frontend router type with backend router type. But this works including the types.
 export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>;
+// @ts-ignore - For some reason, TS errors when comparing frontend router type with backend router type. But this works including the types.
 export type RouterInputs = inferRouterInputs<AppRouter>;
+// @ts-ignore - For some reason, TS errors when comparing frontend router type with backend router type. But this works including the types.
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
