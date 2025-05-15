@@ -14,7 +14,7 @@
         "drizzle-studio": "drizzle-kit studio"
     },
     "dependencies": {
-        "@fastify/cookie": "9.3.1",
+        "@fastify/cookie": "11.0.2",
         "@lucia-auth/adapter-drizzle": "1.1.0",
         "@t3-oss/env-core": "0.13.4",
         "@trpc/server": "11.1.2",
@@ -22,7 +22,7 @@
         "dockerode": "4.0.6",
         "dotenv": "16.5.0",
         "drizzle-orm": "0.43.1",
-        "fastify": "4.27.0",
+        "fastify": "5.3.3",
         "jsonwebtoken": "9.0.2",
         "lodash": "4.17.21",
         "lucia": "3.2.2",
