@@ -19,7 +19,7 @@
         "fastify": "4.27.0",
         "fastify-socket.io": "5.1.0",
         "fastify-type-provider-zod": "1.1.9",
-        "json-joy": "16.24.0",
+        "json-joy": "17.41.0",
         "jsonwebtoken": "9.0.2",
         "lodash": "4.17.21",
         "node-pty": "1.0.0",

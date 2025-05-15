@@ -34,7 +34,7 @@
         "@xterm/xterm": "5.5.0",
         "class-variance-authority": "0.7.1",
         "clsx": "2.1.1",
-        "json-joy": "16.24.0",
+        "json-joy": "17.41.0",
         "lodash": "4.17.21",
         "lucide-react": "0.510.0",
         "monaco-editor": "0.52.2",
