@@ -1,6 +1,4 @@
 # Refresh
-- Notification close icon changed style
-- Do I need @types/node
 + Focus tracking stopped working
 + On upload recording file page, the logo is missing
 + On upload recording file page, the back button top margin is missing
