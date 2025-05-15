@@ -1,4 +1,4 @@
-FROM imbios/bun-node:1.2.4-22.14.0-alpine
+FROM imbios/bun-node:1.2.13-22.14.0-alpine
 
 # Required for node-pty
 RUN apk add make python3 g++
@@ -12,7 +12,7 @@ COPY . .
 RUN bun run build
 
 
-FROM imbios/bun-node:1.2.4-22.14.0-alpine
+FROM imbios/bun-node:1.2.13-22.14.0-alpine
 
 # Required for node-pty
 RUN apk add make python3 g++
