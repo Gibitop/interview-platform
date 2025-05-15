@@ -10,6 +10,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { env } from './common/env.js';
 import { readFile } from 'fs/promises';
 import type packageJson from '../package.json';
+import { deleteOldRooms } from './jobs/delete-old-rooms';
 
 await ping();
 
@@ -36,6 +37,7 @@ server.register(fastifyTRPCPlugin, {
 });
 
 stopOvertimeRooms.start();
+deleteOldRooms.start();
 
 server.get('/', async () => {
     return { hello: 'world' };

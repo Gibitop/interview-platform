@@ -1,10 +1,10 @@
-import { schedule } from 'node-cron';
+import { createTask } from 'node-cron';
 import { db } from '../db';
 import { deleteRecording } from '../common/recordings';
 import { roomsTable } from '../db/tables/roomsTable';
 import { and, eq, inArray, lte } from 'drizzle-orm';
 
-export const deleteOldRooms = schedule('0 0 * * *', async () => {
+export const deleteOldRooms = createTask('0 0 * * *', async () => {
     const rooms = await db
         .select()
         .from(roomsTable)
