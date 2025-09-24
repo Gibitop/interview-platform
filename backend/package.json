@@ -20,7 +20,7 @@
         "@t3-oss/env-core": "0.11.1",
         "@trpc/server": "11.0.0-rc.522",
         "argon2": "0.41.1",
-        "dockerode": "4.0.2",
+        "dockerode": "4.0.8",
         "dotenv": "16.4.5",
         "drizzle-orm": "0.33.00",
         "fastify": "4.27.0",
