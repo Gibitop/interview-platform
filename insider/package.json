@@ -21,7 +21,7 @@
         "fastify-type-provider-zod": "1.1.9",
         "json-joy": "16.24.0",
         "jsonwebtoken": "9.0.2",
-        "lodash": "4.17.21",
+        "lodash": "4.17.23",
         "node-pty": "1.0.0",
         "socket.io": "4.8.0",
         "socket.io-client": "4.8.0",
